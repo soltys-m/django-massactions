@@ -1,0 +1,66 @@
+<div class="modal fade crispy-modal" tabindex="-1" role="dialog" id="modal">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content crispy-modal-content"></div>
+    </div>
+</div>
+
+{% with object_name|lower|default:'object' as object_name %}
+<script type="text/javascript">
+    $(document).ready(function () {
+        function massAction{{ object_name|capfirst }}ModalForm() {
+            $(".mass-action-{{ object_name }}").each(function () {
+                $(this).modalForm({
+                    modalID: "#modal",
+                    modalContent: ".crispy-modal-content",
+                    modalForm: ".crispy-modal-content form",
+                    formURL: $(this).data('form-url'),
+                    initOnClick: false,
+                    asyncUpdate: 'false',
+                    errorClass: '.is-invalid, .invalid-feedback, .alert-danger',
+                    asyncSettings: {
+                        closeOnSubmit: 'true',
+                        addModalFormFunction: massAction{{ object_name|capfirst }}ModalForm
+                    }
+                });
+
+                $(this).click(function (e) {
+                    e.preventDefault();
+                });
+            });
+
+        }
+
+        function addMassAction{{ object_name|capfirst }}ButtonListener() {
+            $(".mass-action-{{ object_name }}").on('click', function () {
+                const formUrl = $(this).data('form-url')
+                $.ajax({
+                    type: 'POST',
+                    headers: {'X-CSRFToken': '{{ csrf_token }}'},
+                    url: "{% url 'encrypt_string' %}",
+                    dataType: "json",
+                    data: {
+                        string: sessionStorage.getItem("{{ object_name|capfirst }}")
+                    },
+                    success: function (data) {
+                        Cookies.set('{{ request.user.id }}' + '_' + "{{ object_name|capfirst }}", data.encrypted_string, {expires: new Date(new Date().getTime() + (1000 * 60 * 60))}); // will expire in 1 hour
+                        showModal({
+                            modalID: "#modal",
+                            modalContent: ".crispy-modal-content",
+                            modalForm: ".crispy-modal-content form",
+                            formURL: formUrl
+                        })
+                    },
+                    error: function (data) {
+                        console.log('Encryption failed.', data);
+                    },
+                });
+            });
+        }
+        massAction{{ object_name|capfirst }}ModalForm();
+        addMassAction{{ object_name|capfirst }}ButtonListener();
+    });
+</script>
+{% endwith %}
+
+{% block js %}
+{% endblock %}

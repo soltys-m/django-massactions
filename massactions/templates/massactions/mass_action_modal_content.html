@@ -1,0 +1,24 @@
+{% load i18n %}
+
+<div class="row mass-action-modal-content">
+    {% if object_list %}
+        <div class="col-md-6">
+            {% if action == 'delete' %}
+                <h4>{% trans 'Following objects will be deleted' %}:</h4>
+            {% elif action == 'update' %}
+                <h4>{% trans 'Following objects will be updated' %}:</h4>
+            {% endif %}
+            {% include 'helpers/mass_action_modal_object_list.html' with object_list=object_list %}
+        </div>
+    {% endif %}
+    {% if not_allowed_object_list %}
+        <div class="col-md-6">
+            {% if action == 'delete' %}
+                <h4>{% trans 'Missing permissions to delete' %}:</h4>
+            {% elif action == 'update' %}
+                <h4>{% trans 'Missing permissions to update' %}:</h4>
+            {% endif %}
+            {% include 'helpers/mass_action_modal_object_list.html' with object_list=not_allowed_object_list %}
+        </div>
+    {% endif %}
+</div>

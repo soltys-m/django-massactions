@@ -1,0 +1,290 @@
+{% load i18n transportly %}
+
+{% if object_list %}
+    <div class="row justify-content-between">
+        {% if not selection_dropdown_disabled %}
+            <div class="col-md d-flex flex-row px-2">
+                {% include 'helpers/mass_action_selection_dropdown.html' %}
+            </div>
+        {% endif %}
+        <div class="col-md my-auto px-2 {% if not selection_dropdown_disabled %}text-center{% endif %}">
+            <span class="selected-items text-gray-s"></span>
+        </div>
+        <div class="col-md px-2 text-end">
+          <div class="mass-actions-dropdown btn-group" role="group">
+            <button type="button" class="mass-actions-btn btn btn-outline-gray-s dropdown-toggle dropdown-fixed px-2 py-1"
+                    data-bs-auto-close="outside" data-bs-toggle="dropdown" aria-expanded="false" id="id_mass_actions_btn">
+                {% trans 'Actions' %}
+            </button>
+            <ul class="dropdown-menu">
+                {{ choice.1 }}
+                {% if 'update' in mass_action_context.actions %}
+                    {% for field in mass_action_context.update_fields_dict %}
+                        {% if not field.choices %}
+                             <li>
+                                <a href="#" class="dropdown-item mass-action-{{ mass_action_context.object_name|lower|default:mass_action_context.model_name|lower }}"
+                                        data-form-url="{% url 'manager:mass_update' %}?model={{ mass_action_context.model_name }}&object_name={{ mass_action_context.object_name }}&app_label={{ mass_action_context.app_label }}&custom_form={{ field.custom_form }}&qs_method={{ mass_action_context.qs_method }}&back_url={{ request.get_full_path|urlencode }}">
+                                        <i class="fa fas fa-pen fa-fw me-2"></i>{{ field.localized_action }}
+                                </a>
+                            </li>
+                        {% elif field.choices|length == 1 %}
+                            <li>
+                                <a href="#" class="dropdown-item mass-action-{{ mass_action_context.object_name|lower|default:mass_action_context.model_name|lower }}"
+                                        data-form-url="{% url 'manager:mass_update' %}?model={{ mass_action_context.model_name }}&object_name={{ mass_action_context.object_name }}&app_label={{ mass_action_context.app_label }}&field_name={{ field.field_name }}&field_name_localized={{ field.field_name_localized }}&field_name_value={{ field.choices.0 }}}&custom_form={{ field.custom_form }}&qs_method={{ mass_action_context.qs_method }}&back_url={{ request.get_full_path|urlencode }}">
+                                        {{ field.localized_action }}
+                                </a>
+                            </li>
+                        {% else %}
+                            <li class="dropdown-submenu">
+                                <a class="dropdown-item dropdown-toggle" href="#" data-bs-toggle="collapse"
+                                    data-bs-target="#{{ field.field_name }}_submenu" aria-expanded="false">
+                                    <i class="fa fas fa-pen fa-fw me-2"></i>{{ field.localized_action }}
+                                </a>
+                                <ul class="collapse" id="{{ field.field_name }}_submenu">
+                                    {% for choice in field.choices %}
+                                        <a href="#" class="dropdown-item mass-action-{{ mass_action_context.object_name|lower|default:mass_action_context.model_name|lower }}"
+                                            data-form-url="{% url 'manager:mass_update' %}?model={{ mass_action_context.model_name }}&object_name={{ mass_action_context.object_name }}&app_label={{ mass_action_context.app_label }}&field_name={{ field.field_name }}&field_name_localized={{ field.field_name_localized }}&field_name_value={{ choice.0 }}&custom_form={{ field.custom_form }}&qs_method={{ mass_action_context.qs_method }}&back_url={{ request.get_full_path|urlencode }}">
+                                            {{ choice.1 }}
+                                        </a>
+                                    {% endfor %}
+                                </ul>
+                            </li>
+                        {% endif %}
+                    {% endfor %}
+                {% endif %}
+                {% if 'delete' in mass_action_context.actions %}
+                    <li>
+                        <a href="#" class="dropdown-item mass-action-{{ mass_action_context.object_name|lower|default:mass_action_context.model_name|lower }}" id="id_mass_action_delete"
+                            data-form-url="{% url 'manager:mass_delete' %}?model={{ mass_action_context.model_name }}&object_name={{ mass_action_context.object_name }}&app_label={{ mass_action_context.app_label }}&qs_method={{ mass_action_context.qs_method }}&back_url={{ request.get_full_path|urlencode }}">
+                            <i class="fa fas fa-trash fa-fw me-2 text-danger"></i>{% trans 'Delete' %}
+                        </a>
+                    </li>
+                {% endif %}
+            </ul>
+          </div>
+        </div>
+    </div>
+    {% include 'helpers/crispy_modal_form_helper_mass_action.html' with object_name=mass_action_context.object_name|lower|default:mass_action_context.model_name|lower %}
+{% endif %}
+
+<script>
+    const objectName = '{{ mass_action_context.object_name|default:mass_action_context.model_name }}';
+    const cookieName = '{{ request.user.id }}' + '_' + objectName;
+    const itemsCount = {{ mass_action_context.items_count }};
+
+    jQuery(document).ready(function ($) {
+        clearCookie();
+        initSelection()
+        addCheckboxEventListener();
+        addSelectAllVisibleListener();
+        addSelectAllListener();
+        addClearAllListener();
+        addMassActionRedirectListener();
+        addMassExportButtonListener();
+    });
+
+    function initSelection() {
+        let cachedSelection = sessionStorage.getItem(objectName);
+        if (cachedSelection === null) {
+            resetSelection();
+        } else {
+            let selection = JSON.parse(cachedSelection);
+            if (wasCurrentFilterChanged(selection) || wasUserChanged(selection)) {
+                resetSelection();
+            } else if (selection.selectAll) {
+                $('.mass-action-checkbox').prop("checked", true);
+                selectOrUnselectCheckboxes(selection, false);
+                updateSelectedItemsLabel(itemsCount - selection.ids.length, itemsCount);
+                sessionStorage.setItem(objectName, JSON.stringify(selection));
+            } else {
+                selectOrUnselectCheckboxes(selection, true);
+                updateSelectedItemsLabel(selection.ids.length, itemsCount);
+                sessionStorage.setItem(objectName, JSON.stringify(selection));
+            }
+        }
+    }
+
+    // clear cookie and remove selection after successful action
+    function clearCookie() {
+        let cookie = Cookies.get(cookieName);
+        if (cookie && cookie === "True") {
+            resetSelection();
+        }
+        Cookies.remove(cookieName);
+    }
+
+    function selectOrUnselectCheckboxes(selection, checked) {
+        selection.ids.forEach((id) => {
+            let checkbox = $(".mass-action-checkbox[value='" + id + "']");
+            if (checkbox.length > 0) {
+                checkbox.prop("checked", checked);
+            }
+        });
+    }
+
+    function addCheckboxEventListener() {
+        $('.mass-action-checkbox').on('change', function () {
+            let id = $(this).val();
+            let selection = JSON.parse(sessionStorage.getItem(objectName));
+            if ($(this).is(':checked')) {
+                if (selection.selectAll) {
+                    selection.ids = jQuery.grep(selection.ids, function (value) {
+                        return value !== id;
+                    });
+                } else if (jQuery.inArray(id, selection.ids) < 0) {
+                    selection.ids.push(id);
+                }
+                sessionStorage.setItem(objectName, JSON.stringify(selection));
+            } else {
+                if (!selection.selectAll) {
+                    selection.ids = jQuery.grep(selection.ids, function (value) {
+                        return value !== id;
+                    });
+                } else if (jQuery.inArray(id, selection.ids) < 0) {
+                    selection.ids.push(id);
+                    // if selectAll is true and user uncheck the last checkbox - change selectAll to false and clear selection
+                    if (selection.ids.length === itemsCount) {
+                        selection.selectAll = false;
+                        selection.ids = [];
+                    }
+                }
+                sessionStorage.setItem(objectName, JSON.stringify(selection));
+            }
+
+            if (selection.selectAll) {
+                updateSelectedItemsLabel(itemsCount - selection.ids.length, itemsCount);
+            } else {
+                updateSelectedItemsLabel(selection.ids.length, itemsCount);
+            }
+        });
+    }
+
+    function addSelectAllVisibleListener() {
+        $('.select-visible').on('click', function () {
+            let selection = JSON.parse(sessionStorage.getItem(objectName));
+            // clear selection if selectAll is true
+            if (selection.selectAll) {
+                resetSelection();
+            }
+            $('.mass-action-checkbox').prop("checked", true).trigger('change');
+        });
+    }
+
+    function addSelectAllListener() {
+        $('.select-all').on('click', function () {
+            $('.mass-action-checkbox').prop("checked", true);
+            let selection = JSON.parse(sessionStorage.getItem(objectName));
+            selection.selectAll = true;
+            selection.ids = [];
+            updateSelectedItemsLabel(itemsCount, itemsCount);
+            sessionStorage.setItem(objectName, JSON.stringify(selection));
+        });
+    }
+
+    function addClearAllListener() {
+        $('.clear-all').on('click', function () {
+            $('.mass-action-checkbox').prop("checked", false);
+            resetSelection();
+        });
+    }
+
+    function addMassExportButtonListener() {
+        $(".mass-action-export").on('click', function () {
+            const exportType = $(this).data('export-type');
+            let url = '';
+            if (exportType === "export") {
+                {% if 'export' in mass_action_context.actions %}
+                    url = "{% export_url "export" mass_action_context.object_name|default:mass_action_context.model_name mass_action_context.app_label %}";
+                {% endif %}
+            } else {
+                {% if 'export-pdf' in mass_action_context.actions %}
+                    url = "{% export_url "pdf" mass_action_context.object_name|default:mass_action_context.model_name mass_action_context.app_label %}";
+                {% endif %}
+            }
+            const selection = JSON.parse(sessionStorage.getItem(objectName));
+            if (selection.currentFilter) {
+                url += selection.currentFilter + "&back_url={{ request.get_full_path|urlencode }}";
+            } else {
+                url += "?back_url={{ request.get_full_path|urlencode }}";
+            }
+            let ids = ''
+            if (selection.ids.length > 0) {
+                if (selection.selectAll) {
+                    ids = '&exclude_ids='
+                } else {
+                    ids = '&ids='
+                }
+                selection.ids.forEach(function (element) {
+                    ids += element + ",";
+                });
+            }
+            window.open(url + ids, "_self");
+        });
+    }
+
+    function addMassActionRedirectListener() {
+        $(".mass-action").on('click', function () {
+            const formUrl = $(this).data('form-url');
+            $.ajax({
+                type: 'POST',
+                headers: {'X-CSRFToken': '{{ csrf_token }}'},
+                url: "{% url 'encrypt_string' %}",
+                dataType: "json",
+                data: {
+                    string: sessionStorage.getItem(objectName)
+                },
+                success: function (data) {
+                    Cookies.set(cookieName, data.encrypted_string, {expires: new Date(new Date().getTime() + (1000 * 60 * 60))}); // will expire in 1 hour
+                    window.open(formUrl, "_self");
+                },
+                error: function (data) {
+                    console.log('Encryption failed.', data);
+                },
+            });
+        });
+    }
+
+    // ******** HELPER ********
+
+    function resetSelection() {
+        let selectionCache = {
+            ids: [],
+            selectAll: false,
+            user: '{{ request.user.id }}',
+            currentFilter: window.location.search
+        }
+        updateSelectedItemsLabel(0, itemsCount);
+        sessionStorage.setItem(objectName, JSON.stringify(selectionCache));
+    }
+
+    function wasUserChanged(selection) {
+        return selection.user !== '{{ request.user.id }}';
+    }
+
+    function wasCurrentFilterChanged(selection) {
+        const currentParams = new URLSearchParams(window.location.search);
+        removeIrrelevantParams(currentParams);
+        const cachedParams = new URLSearchParams(selection.currentFilter);
+        removeIrrelevantParams(cachedParams);
+        return currentParams.toString() !== cachedParams.toString();
+    }
+
+    function removeIrrelevantParams(urlSearchParams){
+        urlSearchParams.delete('page');
+        urlSearchParams.delete('paginate_by');
+        urlSearchParams.delete('sorting');
+        urlSearchParams.delete('display');
+    }
+
+    function updateSelectedItemsLabel(selectionCount, listCount) {
+        if (selectionCount > 0) {
+            $('.selected-items').text("{% trans 'Number of selected items' %}: " + selectionCount + " / " + listCount);
+            $('.mass-actions-btn').attr("disabled", false);
+        } else {
+            $('.selected-items').text("");
+            $('.mass-actions-btn').attr("disabled", true);
+        }
+    }
+
+</script>
+

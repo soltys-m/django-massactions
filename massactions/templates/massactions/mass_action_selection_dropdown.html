@@ -1,0 +1,19 @@
+{% load i18n %}
+<div>
+    <div class="btn-group select-items">
+        {% if is_table %}
+            <button type="button" class="btn btn-outline-gray-s dropdown-toggle" data-bs-toggle="dropdown"
+                    aria-haspopup="true" aria-expanded="false" id="id_mass_action_selection_table">
+            </button>
+        {% else %}
+            <button type="button" class="btn btn-outline-gray-s dropdown-toggle px-2 py-1" data-bs-toggle="dropdown"
+                    aria-haspopup="true" aria-expanded="false" id="id_mass_action_selection">{% trans 'Select' %}
+            </button>
+        {% endif %}
+        <div class="dropdown-menu">
+            <a class="dropdown-item select-visible" href="#" id="id_select_visible">{% trans 'Select visible' %}</a>
+            <a class="dropdown-item select-all" href="#" id="id_select_all">{% trans 'Select all' %}</a>
+            <a class="dropdown-item clear-all" href="#" id="id_clear_all">{% trans 'Clear all' %}</a>
+        </div>
+    </div>
+</div>
