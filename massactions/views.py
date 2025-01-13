@@ -77,8 +77,7 @@ class MassActionViewMixin(PermissionRequiredMixin):
 
     def filter_object_list(self, selection_json):
         self.model = apps.get_model(self.app_label, self.model_name)
-        user = self.request.user
-        object_list = self.model.objects.restrict_list_user(user).of_workspace(user.workspace)
+        object_list = self.restrict_objects_by_user_permission(self.model.objects.all())
 
         # filter qs based on given queryset method
         if self.qs_method:
