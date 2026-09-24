@@ -1,0 +1,4 @@
+{% include 'massactions_tests/mass_action_override.html' %}
+{% for object in object_list %}
+    {% include 'massactions/mass_action_checkbox.html' %}{{ object }}
+{% endfor %}

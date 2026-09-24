@@ -1,0 +1,30 @@
+{% load i18n %}
+{% if modal_title %}
+    <div class="modal-header">
+        <h5 class="modal-title">{{ modal_title }}</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="{{ modal_id|default:'modal' }}" aria-label="Close"></button>
+    </div>
+{% endif %}
+
+<div class="modal-body">
+    {% if modal_message %}
+        <p>{{ modal_message }}</p>
+    {% endif %}
+
+    {% if modal_body %}
+        {{ modal_body|safe }}
+    {% endif %}
+
+    {{ fields|safe }}
+</div>
+
+{% if modal_close or modal_submit %}
+    <div class="modal-footer">
+        {% if modal_close %}
+            <button type="button" class="btn btn-lg btn-secondary" data-bs-dismiss="{{ modal_id|default:'modal' }}">{% trans 'Close' %}</button>
+        {% endif %}
+        {% if modal_submit %}
+            <button type="submit" class="btn btn-primary btn-lg btn-long submit-btn" id="id_submit_btn">{{ modal_submit }}</button>
+        {% endif %}
+    </div>
+{% endif %}

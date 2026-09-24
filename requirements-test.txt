@@ -1,0 +1,9 @@
+# Install with: pip install -r requirements-test.txt
+Django>=4.2,<5.0
+django-crispy-forms>=1.14,<2
+crispy-bootstrap5<0.8
+django-bootstrap-modal-forms>=2.2
+django-filter
+pycryptodome
+pytest
+pytest-django

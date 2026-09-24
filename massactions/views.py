@@ -1,277 +1,278 @@
-import importlib
-import json
-
-from django.contrib.auth.mixins import PermissionRequiredMixin
-from django.urls import reverse
-from urllib.parse import unquote, urlparse, parse_qs
-
-from django.apps import apps
+from urllib.parse import urlparse
 
 from bootstrap_modal_forms.generic import BSModalFormView
 from django.contrib import messages
 from django.contrib.admin.utils import NestedObjects
+from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
+from django.core.exceptions import ImproperlyConfigured
 from django.db import router
 from django.db.models import ProtectedError
+from django.http import Http404, HttpResponseBadRequest, JsonResponse, QueryDict
 from django.shortcuts import redirect, render
-from django.utils.datastructures import MultiValueDict
+from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils.translation import gettext_lazy as _, ngettext
-from django.core.exceptions import ValidationError
+from django.views import View
 
-from massactions.forms import BSModalMassUpdateForm, BSModalMassDeleteForm
-from massactions.helpers import decrypt_string
+from massactions.forms import BSModalMassDeleteForm, BSModalMassUpdateForm
+from massactions.helpers import (encrypt_string, get_selection_cookie_name, parse_selection, apply_selection,
+                                 set_selection_done_cookie)
+from massactions.registry import registry
 
 
-class MassActionListViewMixin(object):
-    mass_actions = ['delete']
-    mass_action_update_dict = []
-    mass_action_object_name = ''
-    mass_action_qs_method = ''
+class EncryptSelectionView(LoginRequiredMixin, View):
+    """Called by the list page JS before opening an action: turns the stored selection into the cookie value."""
+    raise_exception = True
+    http_method_names = ['post']
 
-    def get_context_data(self, *args, **kwargs):
-        context_data = super().get_context_data(*args, **kwargs)
-        context_data['mass_action_context'] = {'model_name': self.model._meta.object_name,
-                                               'app_label': self.model._meta.app_label,
-                                               'object_name': self.mass_action_object_name,
-                                               'actions': self.mass_actions,
-                                               'update_fields_dict': self.mass_action_update_dict,
-                                               'qs_method': self.mass_action_qs_method,
-                                               'items_count': self.filter.qs.count()}
-        return context_data
+    def post(self, request, *args, **kwargs):
+        return JsonResponse({'encrypted_string': encrypt_string(request.POST.get('string', ''))})
 
 
 class MassActionViewMixin(PermissionRequiredMixin):
+    """
+    Resolves the registered config from ``?key=`` and the selection from the cookie, then exposes
+    ``restricted_object_list`` (objects the user may act on) and ``not_allowed_object_list``.
+    """
+    action = None
     permission_denied_message = _('You do not have permission to perform this action.')
+    login_required_message = _('Your session has expired. Please, log in again.')
     select_object_message = _('Please, select an object first.')
     restricted_object_list = None
     not_allowed_object_list = None
 
     def dispatch(self, request, *args, **kwargs):
-        self.model_name = request.GET.get('model', None)
-        self.app_label = request.GET.get('app_label', None)
-        self.object_name = request.GET.get('object_name', None) if request.GET.get('object_name') else self.model_name
-        self.qs_method = request.GET.get('qs_method', None)
-        self.back_url = request.GET.get('back_url', None)
-        self.user_mass_action_cookie = str(request.user.id) + "_" + self.object_name
+        self.config = registry.get(request.GET.get('key'))
+
+        if self.config is None:
+            raise Http404('Unknown mass action key.')
+
+        self.model = self.config.model
+        self.key = self.config.key
+        self.back_url = request.GET.get('back_url') or None
+        self.user_mass_action_cookie = get_selection_cookie_name(request.user.id, self.key)
         self.permission_required = self.get_required_permission_string()
 
         if not self.has_permission():
             return self.handle_no_permission()
 
-        selection_cookie = request.COOKIES.get(self.user_mass_action_cookie)
+        error_response = self.validate_request()
 
-        if selection_cookie:
-            encrypted_selection = unquote(selection_cookie)
-            selection = decrypt_string(encrypted_selection)
-            selection_json = json.loads(selection) if selection else None
+        if error_response is not None:
+            return error_response
 
-            if not selection_json['ids'] and not selection_json['selectAll']:
-                return self.handle_no_object_selected()
+        self.selection = parse_selection(request.COOKIES.get(self.user_mass_action_cookie))
 
-            object_list = self.filter_object_list(selection_json)
+        if not self.selection or (not self.selection['ids'] and not self.selection['selectAll']):
+            return self.handle_no_object_selected()
 
-            # restrict qs based on user permission for given objects
-            self.restricted_object_list = self.restrict_objects_by_user_permission(object_list)
-            self.not_allowed_object_list = object_list.exclude(pk__in=self.restricted_object_list.values('id'))
+        object_list = self.get_selected_queryset(self.selection)
+        self.restricted_object_list = self.restrict_objects_by_user_permission(object_list)
+        self.not_allowed_object_list = object_list.exclude(pk__in=self.restricted_object_list.values('pk'))
 
         return super().dispatch(request, *args, **kwargs)
 
-    def filter_object_list(self, selection_json):
-        self.model = apps.get_model(self.app_label, self.model_name)
-        object_list = self.restrict_objects_by_user_permission(self.model.objects.all())
+    def get_action(self):
+        return self.action
 
-        # filter qs based on given queryset method
-        if self.qs_method:
-            imported_module = importlib.import_module(self.model.__module__.replace('models', 'querysets'))
-            queryset_class = getattr(imported_module, self.model.__name__ + 'QuerySet')
-            queryset_method = getattr(queryset_class, self.qs_method)
-            object_list = queryset_method(object_list)
+    def validate_request(self):
+        """Return an HttpResponse to abort (e.g. 400) or None to continue. Runs after the permission check."""
+        return None
 
-        filter_data = None
-        if self.back_url:
-            filter_data = MultiValueDict(parse_qs(urlparse(self.back_url).query))
+    def get_required_permission_string(self):
+        """An explicit ``permission_required`` on the view wins; otherwise it is derived from the config and action."""
+        if self.permission_required is not None:
+            return self.permission_required
 
-        # filter qs based on current filter data
-        if filter_data:
-            imported_module = importlib.import_module(self.model.__module__.replace('models', 'filters'))
-            filter_class = getattr(imported_module, self.model.__name__ + 'Filter')
-            object_list = filter_class(filter_data, queryset=object_list).qs
+        action = self.get_action()
 
-        if selection_json['selectAll']:
-            object_list = object_list.exclude(pk__in=selection_json['ids'])
-        else:
-            object_list = object_list.filter(pk__in=selection_json['ids'])
+        if action:
+            return self.config.get_permission_required(action)
 
-        return object_list
+        raise ImproperlyConfigured('%s needs either "action" or "permission_required".' % type(self).__name__)
+
+    def has_permission(self):
+        return super().has_permission() and self.config.has_permission(self.request, self.get_action())
+
+    def get_filter_data(self):
+        if not self.back_url:
+            return None
+
+        query = urlparse(self.back_url).query
+        return QueryDict(query) if query else None
+
+    def get_selected_queryset(self, selection):
+        queryset = self.config.get_queryset(self.request)
+        queryset = self.config.filter_queryset(self.request, queryset, self.get_filter_data())
+        return apply_selection(queryset, selection)
+
+    def restrict_objects_by_user_permission(self, object_list):
+        return self.config.restrict_queryset(self.request, object_list, self.get_action())
+
+    def get_success_url(self):
+        if self.back_url and url_has_allowed_host_and_scheme(self.back_url,
+                                                              allowed_hosts={self.request.get_host()},
+                                                              require_https=self.request.is_secure()):
+            return self.back_url
+        return self.config.get_success_url(self.request)
+
+    def handle_no_permission(self):
+        if not self.request.user.is_authenticated:
+            return super().handle_no_permission()  # redirect to login
+
+        messages.error(self.request, self.permission_denied_message)
+        return redirect(self.get_success_url())
 
     def handle_no_object_selected(self):
         messages.error(self.request, self.select_object_message)
-        return redirect(self.request.GET.get('back_url', self.get_success_url()))
+        return redirect(self.get_success_url())
 
-    def handle_no_permission(self):
-        messages.error(self.request, self.permission_denied_message)
-        return redirect(self.request.GET.get('back_url', self.get_success_url()))
-
-    def get_required_permission_string(self):
-        return self.permission_required
-
-    def restrict_objects_by_user_permission(self, object_list):
-        return object_list
+    def finish(self, success=True):
+        """Redirect back and tell the list page to reset the stored selection."""
+        response = redirect(self.get_success_url())
+        return set_selection_done_cookie(response, self.user_mass_action_cookie, success)
 
 
 class BSModalMassActionViewMixin(MassActionViewMixin, BSModalFormView):
     template_name = 'massactions/helpers/crispy_form.html'
+    modal_content_template = 'massactions/helpers/modal_content.html'
 
     def get_form_kwargs(self):
-        return {'object_list': self.restricted_object_list,
-                'not_allowed_object_list': self.not_allowed_object_list,
-                'action': self.get_action()
-                }
+        return {
+            'request': self.request,
+            'config': self.config,
+            'object_list': self.restricted_object_list,
+            'not_allowed_object_list': self.not_allowed_object_list,
+            'action': self.get_action(),
+        }
 
-    def get_context_data(self, **kwargs):
-        context_data = super().get_context_data(**kwargs)
-        context_data['form'] = self.form_class(**self.get_form_kwargs())
-        return context_data
+    def get_form(self, form_class=None):
+        if form_class is None:
+            form_class = self.get_form_class()
+        return form_class(**self.get_form_kwargs())
 
-    def get_required_permission_string(self):
-        return self.app_label + '.' + self.get_action() + '_' + self.model_name.lower()
-
-    def get_success_url(self):
-        return self.request.GET.get('back_url', reverse('manager:dashboard'))
+    def render_modal_message(self, title, message):
+        return render(self.request, self.modal_content_template, {
+            'modal_title': title,
+            'modal_message': message,
+            'modal_close': True,
+        })
 
     def handle_no_permission(self):
-        return render(self.request, "bootstrap5/layout/modal_content.html",
-                      {"modal_title": _('Permission missing'),
-                       "modal_message": self.permission_denied_message,
-                       "modal_close": True
-                       })
+        if not self.request.user.is_authenticated:
+            return self.render_modal_message(_('Login required'), self.login_required_message)
+        return self.render_modal_message(_('Permission missing'), self.permission_denied_message)
 
     def handle_no_object_selected(self):
-        return render(self.request, "bootstrap5/layout/modal_content.html",
-                      {"modal_title": _('No object selected'),
-                       "modal_message": self.select_object_message,
-                       "modal_close": True
-                       })
+        return self.render_modal_message(_('No object selected'), self.select_object_message)
 
 
 class MassDeleteView(BSModalMassActionViewMixin):
+    action = 'delete'
     form_class = BSModalMassDeleteForm
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
-        kwargs.update({'protected_object_list': self.get_protected_objects(self.restricted_object_list)})
+        kwargs['protected_object_list'] = self.get_protected_objects(self.restricted_object_list)
         return kwargs
 
-    def get_action(self):
-        return 'delete'
-
-    def restrict_objects_by_user_permission(self, object_list):
-        return object_list
-
     def post(self, request, *args, **kwargs):
-        return self.delete(request)
+        return self.delete(request, *args, **kwargs)
 
     def delete(self, request, *args, **kwargs):
-        # TODO: add tracking
-        is_success = True
         try:
-            count = self.restricted_object_list.count()
-
-            # Cannot call delete() on a QuerySet that has had a slice taken or can otherwise no longer be filtered.
-            # E.g. after distinct() on QuerySet. In that case delete items individually.
-            try:
-                self.restricted_object_list.delete()
-            except TypeError:
-                for obj in self.restricted_object_list:
-                    obj.delete()
-
-            message = ngettext(
-                '%(count)d object was successfully deleted.',
-                '%(count)d objects were successfully deleted.',
-                count,
-            ) % {'count': count, }
-            messages.success(request, message)
-
+            count = self.perform_delete(self.restricted_object_list)
         except ProtectedError:
-            is_success = False
-            message = _('Objects could not be deleted, because they are associated with other objects.')
-            messages.error(request, message)
+            messages.error(request, _('Objects could not be deleted, because they are associated with other objects.'))
+            return self.finish(success=False)
 
-        response = redirect(self.get_success_url())
-        response.set_cookie(self.user_mass_action_cookie, is_success)
-        return response
+        messages.success(request, ngettext(
+            '%(count)d object was successfully deleted.',
+            '%(count)d objects were successfully deleted.',
+            count,
+        ) % {'count': count})
+        return self.finish()
 
-    def get_protected_objects(self, objs):
-        if not objs.exists():
-            return objs
+    def perform_delete(self, queryset):
+        count = queryset.count()
 
-        using = router.db_for_write(objs[0]._meta.model)
-        collector = NestedObjects(using=using)
-        collector.collect(objs)
+        try:
+            queryset.delete()
+        except TypeError:
+            # sliced or distinct querysets cannot be deleted in bulk
+            for obj in queryset:
+                obj.delete()
+
+        return count
+
+    def get_protected_objects(self, queryset):
+        if not queryset.exists():
+            return []
+
+        collector = NestedObjects(using=router.db_for_write(queryset.model))
+        collector.collect(queryset)
         return collector.protected
 
 
 class MassUpdateFieldView(BSModalMassActionViewMixin):
+    action = 'update'
     form_class = BSModalMassUpdateForm
 
-    def dispatch(self, request, *args, **kwargs):
-        self.field_name = request.GET.get('field_name', None)
-        self.field_name_localized = request.GET.get('field_name_localized', None)
-        self.field_name_value = request.GET.get('field_name_value', None)
-        self.custom_form = request.GET.get('custom_form', None)
-        return super().dispatch(request, *args, **kwargs)
+    def validate_request(self):
+        self.field_name = self.request.GET.get('field_name')
+        self.field_name_value = self.request.GET.get('field_name_value')
+        self.update_field = self.config.get_update_field(self.field_name)
+
+        if self.update_field is None:
+            return HttpResponseBadRequest('Unknown field.')
+
+        choices = self.update_field.get('choices')
+
+        if choices and self.field_name_value is not None:
+            if str(self.field_name_value) not in {str(choice[0]) for choice in choices}:
+                return HttpResponseBadRequest('Invalid value.')
+
+        return None
 
     def get_form_class(self):
-        if self.custom_form:
-            imported_module = importlib.import_module(self.model.__module__.replace('models', 'forms'))
-            self.form_class = getattr(imported_module, 'MassAction' + self.object_name + 'Form')
-        return self.form_class
-
-    def get_form(self, form_class=None):
-        return self.get_form_class()(**self.get_form_kwargs())
-
-    def get_action(self):
-        return 'update'
-
-    def restrict_objects_by_user_permission(self, object_list):
-        return object_list
-
-    def get_required_permission_string(self):
-        return self.app_label + '.change_' + self.model_name.lower()
+        return self.config.get_update_form_class(self.field_name) or self.form_class
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
-        kwargs.update({'field_name': self.field_name})
-        kwargs.update({'field_name_value': self.field_name_value})
-        kwargs.update({'field_name_localized': self.field_name_localized})
-        kwargs.update({'form_model': self.model})
+        kwargs.update({
+            'field_name': self.field_name,
+            'field_name_value': self.field_name_value,
+            'field_name_localized': self.update_field.get('field_name_localized'),
+            'form_model': self.model,
+        })
         return kwargs
 
-    def get_localized_field_value(self):
-        for choice in getattr(self.model, self.field_name).field.choices:
-            if choice[0] == self.field_name_value:
-                return choice[0]
-        return self.field_name_value
-
     def post(self, request, *args, **kwargs):
-        return self.bulk_update_field(request)
+        return self.bulk_update_field(request, *args, **kwargs)
 
     def bulk_update_field(self, request, *args, **kwargs):
-        for obj in self.restricted_object_list:
-            form = self.get_form_class()(request.POST, **self.get_form_kwargs())
+        form = self.get_form_class()(request.POST, **self.get_form_kwargs())
 
-            if form.is_valid():
-                obj.save()
-            else:
-                raise ValidationError(_('Invalid form'))
+        if not form.is_valid():
+            return self.form_invalid(form)
 
-        count = self.restricted_object_list.count()
-        message = ngettext(
+        count = self.perform_update(self.restricted_object_list, form)
+        messages.success(request, ngettext(
             '%(count)d object was successfully updated.',
             '%(count)d objects were successfully updated.',
             count,
-        ) % {'count': count, }
-        messages.success(request, message)
+        ) % {'count': count})
+        return self.finish()
 
-        response = redirect(self.get_success_url())
-        response.set_cookie(self.user_mass_action_cookie, True)
-        return response
+    def get_update_values(self, form):
+        return {name: form.cleaned_data.get(name) for name in form.fields}
+
+    def perform_update(self, queryset, form):
+        """Objects are updated one by one through ``config.update_object()``. Override for ``queryset.update()``."""
+        values = self.get_update_values(form)
+        count = 0
+
+        for obj in queryset:
+            self.config.update_object(self.request, obj, values)
+            count += 1
+
+        return count

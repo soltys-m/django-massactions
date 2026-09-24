@@ -1,0 +1,7 @@
+{% extends 'massactions/mass_action.html' %}
+
+{% block mass_action_menu_extra %}
+    <li>
+        <a href="#" class="dropdown-item mass-action-{{ ctx.key|slugify }}" id="id_custom_action" data-form-url="/custom/?key={{ ctx.key }}">Custom action</a>
+    </li>
+{% endblock %}

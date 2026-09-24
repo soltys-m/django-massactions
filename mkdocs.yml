@@ -1,0 +1,25 @@
+site_name: django-massactions
+site_description: Mass (bulk) actions for Django list views
+repo_url: https://github.com/soltys-m/django-massactions
+repo_name: soltys-m/django-massactions
+
+docs_dir: docs
+
+theme:
+  name: material
+  features:
+    - navigation.sections
+    - navigation.top
+    - search.highlight
+
+nav:
+  - Home: index.md
+  - Installation: installation.md
+  - Configuration: configuration.md
+  - Templates and JavaScript: templates.md
+  - Custom actions: custom-actions.md
+  - Migrating from an inline implementation: migration.md
+  - Security: security.md
+
+plugins:
+  - search

@@ -1,15 +1,9 @@
 <div class="mass-action-items">
     {% for object in object_list %}
-        <a href="{{ object.get_absolute_url }}" target="_blank">
-            {% if object.title %}
-                {{ object.title }}
-            {% elif object.number %}
-                {{ object.number }}
-            {% elif object.first_name and object.last_name %}
-                {{ object.first_name }} {{ object.last_name }}
-            {% else %}
-                {{ object.name }}
-            {% endif %}
-        </a>
+        {% if object.get_absolute_url %}
+            <a href="{{ object.get_absolute_url }}" target="_blank">{{ object }}</a>
+        {% else %}
+            <span>{{ object }}</span>
+        {% endif %}
     {% endfor %}
 </div>
