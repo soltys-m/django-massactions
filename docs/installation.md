@@ -4,8 +4,9 @@
 pip install django-massactions
 ```
 
-Requirements: Django ≥ 3.2, django-crispy-forms ≥ 1.14 (2.x supported, less tested), crispy-bootstrap5,
-django-bootstrap-modal-forms ≥ 2.2, pycryptodome. django-filter is optional (`filter_class`).
+Requirements: Python ≥ 3.9, Django ≥ 4.2, django-crispy-forms ≥ 1.14 (1.x and 2.x), crispy-bootstrap5,
+django-bootstrap-modal-forms ≥ 2.2 (2.x and 3.x), pycryptodome. django-filter is optional (`filter_class`).
+The CI matrix covers Python 3.10 to 3.12 with Django 4.2, 5.0 and 5.1 (crispy 2.x stack) plus Django 4.2 with the crispy 1.x stack.
 
 ## Settings
 

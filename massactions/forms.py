@@ -4,7 +4,7 @@ from crispy_forms.utils import flatatt, TEMPLATE_PACK
 from django.core.exceptions import ValidationError, FieldDoesNotExist, ImproperlyConfigured
 from django.template import loader
 from django.template.loader import render_to_string
-from django.utils.html import format_html, format_html_join
+from django.utils.html import format_html
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _, ngettext
 

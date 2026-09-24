@@ -1,4 +1,4 @@
-from urllib.parse import quote, urlencode
+from urllib.parse import urlencode
 
 from django.contrib.auth.models import User, Permission
 from django.test import TestCase

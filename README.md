@@ -1,5 +1,7 @@
 # django-massactions
 
+[![tests](https://github.com/soltys-m/django-massactions/actions/workflows/tests.yml/badge.svg)](https://github.com/soltys-m/django-massactions/actions/workflows/tests.yml)
+
 Mass (bulk) actions for Django list views: users select rows with checkboxes (or "select all"
 across pages), pick an action from a dropdown and confirm it in a Bootstrap 5 modal. Built-in
 actions: **delete** and **update a field**. Custom actions plug into the same selection mechanism.
@@ -19,8 +21,9 @@ actions: **delete** and **update a field**. Custom actions plug into the same se
 
 ## Requirements
 
-* Django >= 3.2, django-crispy-forms >= 1.14 (2.x is supported but less tested), crispy-bootstrap5,
-  django-bootstrap-modal-forms >= 2.2, pycryptodome
+* Django >= 4.2, django-crispy-forms >= 1.14 (1.x and 2.x), crispy-bootstrap5,
+  django-bootstrap-modal-forms >= 2.2 (2.x and 3.x), pycryptodome. CI runs the suite on Python 3.10 to 3.12
+  with Django 4.2, 5.0 and 5.1 (crispy 2.x stack) and on Django 4.2 with the crispy 1.x stack.
 * Optional: django-filter (for `filter_class`)
 * Frontend: jQuery, Bootstrap 5, Font Awesome (icons), [js-cookie](https://github.com/js-cookie/js-cookie)
   and the **bundled fork** of the modal forms plugin:
@@ -240,6 +243,9 @@ permission, is not logged in or has nothing selected.
 pip install -r requirements-test.txt
 pytest                       # or: python runtests.py
 ```
+
+GitHub Actions (`.github/workflows/tests.yml`) runs the suite for every push to `main` and every pull
+request across the supported Django/crispy combinations, plus `pyflakes` and a package build check.
 
 ## Documentation
 

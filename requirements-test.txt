@@ -7,3 +7,4 @@ django-filter
 pycryptodome
 pytest
 pytest-django
+pytest-cov

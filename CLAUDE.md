@@ -19,6 +19,7 @@ python -m build                          # sdist + wheel (templates and static i
 ```
 
 Tests use an in-memory SQLite database and the test app `massactions.tests` (label `massactions_tests`).
+CI: `.github/workflows/tests.yml` (Python 3.10-3.12 x Django 4.2/5.0/5.1 with the crispy 2.x stack, plus Django 4.2 with crispy 1.x; pyflakes; build).
 
 ## Architecture
 

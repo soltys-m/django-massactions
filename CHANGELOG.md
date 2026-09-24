@@ -13,4 +13,4 @@ First usable release, extracted from the transportly webapp.
 * Hardening: `back_url` host check, `field_name`/`field_name_value` validation, invalid cookies and stale ids
   handled, object names no longer parsed as templates, invalid pks dropped.
 * Templates with override blocks, bundled fork of the modal forms JS plugin.
-* Test suite (`python runtests.py` / `pytest`).
+* Test suite (`python runtests.py` / `pytest`) and GitHub Actions workflow (Python 3.10-3.12, Django 4.2/5.0/5.1, crispy-forms 1.x and 2.x, pyflakes, package build).
