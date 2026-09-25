@@ -1,8 +1,8 @@
 # Changelog
 
-## 0.1.0 (unreleased)
+## 0.1.0 (2026-09-25)
 
-First usable release, extracted from the transportly webapp.
+First usable release
 
 * Registry of `MassActionConfig` classes; views resolve model, queryset, filter, permissions and forms
   from the registered `key` instead of request parameters.
