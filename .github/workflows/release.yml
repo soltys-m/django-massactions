@@ -3,8 +3,8 @@ name: Release
 # Runs when a version tag is pushed (git tag v0.1.0 && git push origin v0.1.0).
 # 1. builds sdist + wheel and checks that the tag matches massactions.VERSION
 # 2. creates a GitHub release with the wheel attached (installable without PyPI)
-# 3. publishes to PyPI through trusted publishing (needs the "pypi" environment and a
-#    trusted publisher configured on pypi.org for this repository; remove the job if unused)
+# 3. publishes to PyPI through trusted publishing, only when the repository variable PUBLISH_TO_PYPI is
+#    "true" (needs the "pypi" environment and a trusted publisher configured on pypi.org for this repository)
 
 on:
   push:
@@ -50,6 +50,8 @@ jobs:
           generate_release_notes: true
 
   pypi:
+    # enabled by the repository variable PUBLISH_TO_PYPI=true (Settings -> Secrets and variables -> Actions -> Variables)
+    if: vars.PUBLISH_TO_PYPI == 'true'
     needs: build
     runs-on: ubuntu-latest
     environment: pypi
