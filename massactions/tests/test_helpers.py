@@ -1,19 +1,54 @@
 import json
+import time
+from unittest import mock
+from urllib.parse import quote
 
-from django.test import TestCase
+from django.core import signing
+from django.test import TestCase, override_settings
 
-from massactions.helpers import encrypt_string, decrypt_string, parse_selection, clean_ids, apply_selection
+from massactions.helpers import sign_selection, unsign_selection, parse_selection, clean_ids, apply_selection
 from massactions.tests.models import Item
 
 
-class CryptoTests(TestCase):
+class SigningTests(TestCase):
     def test_roundtrip(self):
-        self.assertEqual(decrypt_string(encrypt_string('{"ids": ["1"]}')), '{"ids": ["1"]}')
+        value = sign_selection({'ids': ['1'], 'selectAll': False})
+        self.assertEqual(unsign_selection(value), {'ids': ['1'], 'selectAll': False})
 
-    def test_key_travels_with_ciphertext(self):
-        # documents the current design: the value can be produced and read without any server secret
-        value = encrypt_string(json.dumps({'ids': [], 'selectAll': True}))
-        self.assertTrue(json.loads(decrypt_string(value))['selectAll'])
+    def test_accepts_json_string(self):
+        self.assertEqual(unsign_selection(sign_selection('{"ids": ["1"]}')), {'ids': ['1']})
+
+    def test_rejects_non_dict(self):
+        with self.assertRaises(ValueError):
+            sign_selection('[1, 2]')
+
+    def test_tampered_value_is_rejected(self):
+        value = sign_selection({'ids': ['1'], 'selectAll': False})
+        payload, timestamp, signature = value.rsplit(':', 2)
+        forged = ':'.join([signing.b64_encode(b'{"ids":[],"selectAll":true}').decode(), timestamp, signature])
+        self.assertIsNone(unsign_selection(forged))
+        self.assertIsNone(unsign_selection(value[:-1] + ('a' if value[-1] != 'a' else 'b')))
+
+    def test_value_signed_with_another_secret_is_rejected(self):
+        value = sign_selection({'ids': ['1']})
+        with override_settings(SECRET_KEY='another-secret'):
+            self.assertIsNone(unsign_selection(value))
+
+    def test_expired_value_is_rejected(self):
+        with mock.patch('django.core.signing.time.time', return_value=time.time() - 7200):
+            value = sign_selection({'ids': ['1']})
+        self.assertIsNone(unsign_selection(value))          # default max age is one hour
+        self.assertIsNotNone(unsign_selection(value, max_age=3 * 3600))
+
+    def test_garbage(self):
+        self.assertIsNone(unsign_selection(None))
+        self.assertIsNone(unsign_selection(''))
+        self.assertIsNone(unsign_selection('not-a-cookie'))
+        self.assertIsNone(unsign_selection('a:b:c'))
+
+    def test_url_encoded_cookie_value(self):
+        value = sign_selection({'ids': ['1']})
+        self.assertEqual(unsign_selection(quote(value)), {'ids': ['1']})
 
 
 class ParseSelectionTests(TestCase):
@@ -26,16 +61,16 @@ class ParseSelectionTests(TestCase):
         self.assertIsNone(parse_selection('x'))
 
     def test_non_dict_payload(self):
-        self.assertIsNone(parse_selection(encrypt_string('[1, 2]')))
-        self.assertIsNone(parse_selection(encrypt_string('{"ids": "1,2"}')))
+        self.assertIsNone(parse_selection(signing.dumps([1, 2], salt='massactions.selection', compress=True)))
+        self.assertIsNone(parse_selection(sign_selection('{"ids": "1,2"}')))
 
     def test_ids_are_strings_and_select_all_is_bool(self):
-        selection = parse_selection(encrypt_string(json.dumps({'ids': [1, '2'], 'selectAll': 'yes'})))
+        selection = parse_selection(sign_selection(json.dumps({'ids': [1, '2'], 'selectAll': 'yes'})))
         self.assertEqual(selection['ids'], ['1', '2'])
         self.assertTrue(selection['selectAll'])
 
     def test_defaults(self):
-        selection = parse_selection(encrypt_string('{}'))
+        selection = parse_selection(sign_selection('{}'))
         self.assertEqual(selection, {'ids': [], 'selectAll': False, 'user': None, 'currentFilter': None})
 
 

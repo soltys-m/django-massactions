@@ -1,28 +1,46 @@
-import base64
 import json
-import random
-import string
 from urllib.parse import unquote
 
-from Crypto.Cipher import AES
-from Crypto.Util.Padding import pad, unpad
+from django.core import signing
 from django.core.exceptions import ValidationError
 
-KEY_LENGTH = 16
+from massactions.settings import get_selection_max_age
+
+SELECTION_SALT = 'massactions.selection'
 
 
-def encrypt_string(string_to_encrypt):
-    key = ''.join(random.choices(string.ascii_letters + string.digits, k=KEY_LENGTH))
-    padded = pad(string_to_encrypt.encode(), 16)
-    cipher = AES.new(key.encode('utf-8'), AES.MODE_ECB)
-    return base64.b64encode(cipher.encrypt(padded)).decode('utf-8') + key
+def sign_selection(selection):
+    """
+    Serialize the selection (dict or JSON string) and sign it with ``SECRET_KEY``.
+
+    The value is tamper proof and expires (``MASSACTIONS_SELECTION_MAX_AGE``), but it is not secret:
+    it is compressed JSON in base64. Nothing sensitive is stored in it, only ids and flags, and every id
+    is re-validated against the config queryset anyway.
+    """
+    if isinstance(selection, (str, bytes)):
+        selection = json.loads(selection)
+
+    if not isinstance(selection, dict):
+        raise ValueError('selection must be a dict')
+
+    return signing.dumps(selection, salt=SELECTION_SALT, compress=True)
 
 
-def decrypt_string(string_to_decrypt):
-    key = string_to_decrypt[-KEY_LENGTH:]
-    enc = base64.b64decode(string_to_decrypt[:-KEY_LENGTH])
-    cipher = AES.new(key.encode('utf-8'), AES.MODE_ECB)
-    return unpad(cipher.decrypt(enc), 16).decode('utf-8')
+def unsign_selection(value, max_age=None):
+    """Return the selection dict, or ``None`` when the value is missing, tampered with, expired or malformed."""
+    if not value:
+        return None
+
+    if max_age is None:
+        max_age = get_selection_max_age()
+
+    try:
+        data = signing.loads(unquote(value), salt=SELECTION_SALT, max_age=max_age)
+    except (signing.BadSignature, ValueError, TypeError):  # SignatureExpired is a BadSignature
+        return None
+
+    return data if isinstance(data, dict) else None
+
 
 
 def get_selection_cookie_name(user_id, key):
@@ -32,17 +50,11 @@ def get_selection_cookie_name(user_id, key):
 def parse_selection(cookie_value):
     """
     Decode the selection cookie written by the list page.
-    Returns ``{'ids': [str], 'selectAll': bool, ...}`` or ``None`` when the cookie is missing or malformed.
+    Returns ``{'ids': [str], 'selectAll': bool, ...}`` or ``None`` when the cookie is missing, invalid or expired.
     """
-    if not cookie_value:
-        return None
+    data = unsign_selection(cookie_value)
 
-    try:
-        data = json.loads(decrypt_string(unquote(cookie_value)))
-    except (ValueError, TypeError, IndexError):
-        return None
-
-    if not isinstance(data, dict):
+    if data is None:
         return None
 
     ids = data.get('ids') or []

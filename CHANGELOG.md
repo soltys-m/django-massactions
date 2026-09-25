@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.2.0 (unreleased)
+
+* The selection cookie is signed with `django.core.signing` (`SECRET_KEY`, salt, zlib compression, expiry
+  `MASSACTIONS_SELECTION_MAX_AGE`, default one hour) instead of AES-ECB with the key appended to the value.
+  Tampered or expired values are treated as "nothing selected". `pycryptodome` is no longer required.
+* `helpers.sign_selection()` / `helpers.unsign_selection()` replace `encrypt_string()` / `decrypt_string()`.
+  `massactions:encrypt` validates the posted JSON (400 otherwise) and returns the signed value under
+  `encrypted_string` and `selection`.
+* Existing cookies from 0.1 are rejected after the upgrade; users just pick the objects again.
+
 ## 0.1.0 (2026-09-25)
 
 First usable release

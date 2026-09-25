@@ -32,7 +32,7 @@ CI: `.github/workflows/tests.yml` (Python 3.10-3.12 x Django 4.2/5.0/5.1 with th
 * `forms.py` – crispy layout for the modal (`MassActionModalContentLayout`), `BSModalMassActionFormMixin`
   and the delete/update forms. `RawHTML` inserts rendered HTML without re-parsing it as a template.
 * `mixins.py` – `MassActionListViewMixin` puts `mass_action_context` into the list view context.
-* `helpers.py` – selection cookie (AES obfuscation, key travels with the value), parsing and cleaning.
+* `helpers.py` – selection cookie (signed with `django.core.signing`, expiring), parsing and cleaning.
 * `settings.py` – app settings read at call time (`MASSACTIONS_AUTODISCOVER`, `MASSACTIONS_DEFAULT_SUCCESS_URL`).
 * `templates/massactions/` – action bar (`mass_action.html`, contains the selection JS), modal helper
   (appends the modal container to `<body>`), modal content. One set of templates serves Bootstrap 4 and 5:

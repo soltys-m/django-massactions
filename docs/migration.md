@@ -16,7 +16,7 @@ If your project has that copy, the mapping is:
 | `helpers/mass_action*.html`, `forms/crispy_modal_form_helper_mass_action.html` | `massactions/...` templates; project template extends `massactions/mass_action.html` |
 | `{% url 'manager:mass_delete' %}` | `{% url 'massactions:mass_delete' %}` |
 | `{% url 'encrypt_string' %}` API view | `massactions:encrypt` (bundled) |
-| `transportly.helpers.encrypt_string` | `massactions.helpers.encrypt_string` |
+| `transportly.helpers.encrypt_string` | `massactions.helpers.sign_selection` |
 
 Keys should equal the former `object_name` (or model name) so that existing `sessionStorage` entries and
 the cookie reset after a single delete keep working.
@@ -29,4 +29,4 @@ Checklist:
 4. Rebuild custom views on `BSModalMassActionViewMixin` / `MassActionViewMixin` with `action = '...'`.
 5. Replace the project templates with overrides of the library templates; update `include` paths.
 6. Update tests: request parameter `key` instead of `model`/`app_label`, cookies via
-   `massactions.helpers.encrypt_string`.
+   `massactions.helpers.sign_selection`.

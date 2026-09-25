@@ -1,3 +1,4 @@
+import json
 from urllib.parse import urlparse
 
 from bootstrap_modal_forms.generic import BSModalFormView
@@ -15,18 +16,30 @@ from django.utils.translation import gettext_lazy as _, ngettext
 from django.views import View
 
 from massactions.forms import BSModalMassDeleteForm, BSModalMassUpdateForm
-from massactions.helpers import (encrypt_string, get_selection_cookie_name, parse_selection, apply_selection,
+from massactions.helpers import (sign_selection, get_selection_cookie_name, parse_selection, apply_selection,
                                  set_selection_done_cookie)
 from massactions.registry import registry
 
 
 class EncryptSelectionView(LoginRequiredMixin, View):
-    """Called by the list page JS before opening an action: turns the stored selection into the cookie value."""
+    """
+    Called by the list page JS before opening an action: signs the stored selection so the action view
+    can trust the cookie value. The name is historical, the value is signed, not encrypted.
+    """
     raise_exception = True
     http_method_names = ['post']
 
     def post(self, request, *args, **kwargs):
-        return JsonResponse({'encrypted_string': encrypt_string(request.POST.get('string', ''))})
+        try:
+            selection = json.loads(request.POST.get('string', ''))
+        except ValueError:
+            selection = None
+
+        if not isinstance(selection, dict):
+            return HttpResponseBadRequest('Invalid selection.')
+
+        signed = sign_selection(selection)
+        return JsonResponse({'encrypted_string': signed, 'selection': signed})
 
 
 class MassActionViewMixin(PermissionRequiredMixin):

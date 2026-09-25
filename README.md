@@ -12,7 +12,7 @@ actions: **delete** and **update a field**. Custom actions plug into the same se
    (the action bar) and `massactions/mass_action_checkbox.html` (one per row).
 2. The selection lives in `sessionStorage` on the client (`ids` + `selectAll` flag + the current filter).
 3. When the user picks an action, the page posts the selection to `massactions:encrypt`, stores the
-   returned value in a cookie and opens the action URL in a modal.
+   returned **signed** value (`django.core.signing`, one hour) in a cookie and opens the action URL in a modal.
 4. The action view resolves everything from a **registered config** (`?key=...`): the queryset the
    user may see, the list filter (so "select all" respects the filtered list), the permission and
    the per-action restriction. The client never sends model names, queryset methods or form classes.
@@ -21,8 +21,8 @@ actions: **delete** and **update a field**. Custom actions plug into the same se
 
 ## Requirements
 
-* Django >= 4.2, django-crispy-forms >= 1.13 (1.x and 2.x), django-bootstrap-modal-forms >= 2.2 (2.x and 3.x),
-  pycryptodome. The crispy template pack of your Bootstrap version: `crispy-bootstrap5` (extra `[bootstrap5]`)
+* Django >= 4.2, django-crispy-forms >= 1.13 (1.x and 2.x), django-bootstrap-modal-forms >= 2.2 (2.x and 3.x).
+  The crispy template pack of your Bootstrap version: `crispy-bootstrap5` (extra `[bootstrap5]`)
   or, for Bootstrap 4 with crispy-forms 2.x, `crispy-bootstrap4` (extra `[bootstrap4]`; crispy-forms 1.x ships
   the `bootstrap4` pack itself). CI runs the suite on Python 3.10 to 3.12 with Django 4.2, 5.0 and 5.1
   (crispy 2.x stack) and on Django 4.2 with the crispy 1.13 stack.
@@ -255,7 +255,8 @@ renders only the menu items (`<a class="dropdown-item">`); include the selection
 * `MassUpdateFieldView` (`massactions:mass_update`): `?field_name=` must be declared in
   `update_fields`, `?field_name_value=` must be one of its `choices`. Objects are saved one by one
   (signals, `auto_now`); override `perform_update()` for `queryset.update()`.
-* `EncryptSelectionView` (`massactions:encrypt`): POST only, login required.
+* `EncryptSelectionView` (`massactions:encrypt`): POST only, login required; validates the posted JSON and
+  returns it signed (the name is historical, nothing is encrypted).
 
 Views answer with a small modal (`massactions/helpers/modal_content.html`) when the user has no
 permission, is not logged in or has nothing selected.
@@ -266,13 +267,15 @@ permission, is not logged in or has nothing selected.
 |---|---|---|
 | `MASSACTIONS_AUTODISCOVER` | `True` | Import `massactions.py` from every installed app on startup. |
 | `MASSACTIONS_DEFAULT_SUCCESS_URL` | `'/'` | Redirect target when `back_url` is missing or points to another host. |
+| `MASSACTIONS_SELECTION_MAX_AGE` | `3600` | Seconds a signed selection is accepted (the page lets the cookie expire after one hour as well). |
 
 ## Security notes
 
 * Only registered keys are reachable; the model, queryset, filter and form are never taken from the request.
 * `back_url` is only followed when it points to the current host.
-* The selection cookie is obfuscated (AES with the key appended), not authenticated. Do not treat it as
-  trusted input: `get_queryset()` / `restrict_queryset()` are the authorization boundary.
+* The selection cookie is signed with `SECRET_KEY` (`django.core.signing`, salted, expiring), so it cannot be
+  tampered with or replayed after an hour. It is not encrypted: the payload is compressed JSON with ids and
+  flags. `get_queryset()` / `restrict_queryset()` remain the authorization boundary for every id.
 * Object names are inserted into the modal as escaped HTML, not re-parsed as templates.
 
 ## Translations

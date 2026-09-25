@@ -37,7 +37,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install "Django==${{ matrix.django-version }}.*"
           pip install pytest pytest-django pytest-cov
-          pip install django-filter pycryptodome
+          pip install django-filter
 
       - name: Install crispy stack (current)
         if: matrix.crispy-stack == 'current'

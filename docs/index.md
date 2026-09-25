@@ -13,7 +13,7 @@ list page ──(checkbox changes)──► sessionStorage["<key>"] = {ids, sele
    │
    │ click on an action
    ▼
-POST massactions:encrypt ──► cookie "<user_id>_<key>" = obfuscated selection
+POST massactions:encrypt ──► cookie "<user_id>_<key>" = signed selection (SECRET_KEY, 1 hour)
    │
    ▼
 GET  <action url>?key=<key>&back_url=<list url>   ──► modal with the objects and a confirmation

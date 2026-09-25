@@ -4,9 +4,9 @@ from django.contrib.auth.models import User, Permission
 from django.test import TestCase
 from django.urls import reverse
 
-from massactions.helpers import decrypt_string
+from massactions.helpers import unsign_selection
 from massactions.tests.models import Item, Child
-from massactions.tests.utils import set_selection
+from massactions.tests.utils import set_selection, make_selection_cookie
 
 
 class MassActionTestCase(TestCase):
@@ -209,14 +209,29 @@ class UpdateTests(MassActionTestCase):
 
 
 class EncryptViewTests(MassActionTestCase):
-    def test_post_returns_encrypted_selection(self):
-        response = self.client.post(reverse('massactions:encrypt'), {'string': '{"ids": ["1"]}'})
+    def test_post_returns_signed_selection(self):
+        response = self.client.post(reverse('massactions:encrypt'), {'string': '{"ids": ["1"], "selectAll": false}'})
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(decrypt_string(response.json()['encrypted_string']), '{"ids": ["1"]}')
+        data = response.json()
+        self.assertEqual(data['encrypted_string'], data['selection'])
+        self.assertEqual(unsign_selection(data['selection']), {'ids': ['1'], 'selectAll': False})
+
+    def test_invalid_json_is_400(self):
+        self.assertEqual(self.client.post(reverse('massactions:encrypt'), {'string': 'x'}).status_code, 400)
+        self.assertEqual(self.client.post(reverse('massactions:encrypt'), {'string': '[1]'}).status_code, 400)
+        self.assertEqual(self.client.post(reverse('massactions:encrypt')).status_code, 400)
 
     def test_anonymous_is_403(self):
         self.client.logout()
-        self.assertEqual(self.client.post(reverse('massactions:encrypt'), {'string': 'x'}).status_code, 403)
+        self.assertEqual(self.client.post(reverse('massactions:encrypt'), {'string': '{}'}).status_code, 403)
 
     def test_get_not_allowed(self):
         self.assertEqual(self.client.get(reverse('massactions:encrypt')).status_code, 405)
+
+    def test_tampered_cookie_means_nothing_selected(self):
+        name, value = make_selection_cookie(self.user, self.key, [self.a.pk])
+        self.client.cookies[name] = value[:-2] + 'zz'
+        response = self.client.get(self.url('mass_delete'))
+        self.assertContains(response, 'No object selected')
+        self.client.post(self.url('mass_delete'))
+        self.assertEqual(Item.objects.count(), 4)

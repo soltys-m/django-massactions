@@ -5,7 +5,7 @@ pip install django-massactions[bootstrap5]      # or [bootstrap4] with crispy-fo
 ```
 
 Requirements: Python ≥ 3.9, Django ≥ 4.2, django-crispy-forms ≥ 1.13 (1.x and 2.x),
-django-bootstrap-modal-forms ≥ 2.2 (2.x and 3.x), pycryptodome. The crispy template pack of your Bootstrap
+django-bootstrap-modal-forms ≥ 2.2 (2.x and 3.x). The crispy template pack of your Bootstrap
 version is an extra: `[bootstrap5]` installs `crispy-bootstrap5`, `[bootstrap4]` installs `crispy-bootstrap4`
 (crispy-forms 2.x only; crispy-forms 1.x ships the `bootstrap4` pack itself). django-filter is optional
 (`filter_class`). The CI matrix covers Python 3.10 to 3.12 with Django 4.2, 5.0 and 5.1 (crispy 2.x stack)
@@ -40,6 +40,7 @@ TEMPLATES = [{
 |---|---|---|
 | `MASSACTIONS_AUTODISCOVER` | `True` | Import `massactions.py` from every installed app on startup. |
 | `MASSACTIONS_DEFAULT_SUCCESS_URL` | `'/'` | Redirect target when `back_url` is missing or points to another host. |
+| `MASSACTIONS_SELECTION_MAX_AGE` | `3600` | Seconds a signed selection is accepted. |
 
 ## URLs
 

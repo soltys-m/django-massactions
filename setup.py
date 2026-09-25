@@ -9,7 +9,7 @@ setup(
     description='Mass (bulk) actions for Django list views: selection, confirmation modals, delete and field update.',
     long_description=open('README.md').read(),
     long_description_content_type='text/markdown',
-    author='Michal Šoltys @ MS Code',
+    author='MS Code',
     maintainer='MS Code',
     url='https://github.com/soltys-m/django-massactions',
     packages=find_packages(exclude=['massactions.tests', 'massactions.tests.*']),
@@ -19,7 +19,6 @@ setup(
         'django>=4.2',
         'django-crispy-forms>=1.13',
         'django-bootstrap-modal-forms>=2.2',
-        'pycryptodome',
     ],
     extras_require={
         'bootstrap5': ['crispy-bootstrap5'],
