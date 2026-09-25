@@ -1,6 +1,7 @@
 from urllib.parse import urlparse
 
 from bootstrap_modal_forms.generic import BSModalFormView
+from crispy_forms.utils import get_template_pack
 from django.contrib import messages
 from django.contrib.admin.utils import NestedObjects
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
@@ -155,6 +156,7 @@ class BSModalMassActionViewMixin(MassActionViewMixin, BSModalFormView):
             'modal_title': title,
             'modal_message': message,
             'modal_close': True,
+            'template_pack': get_template_pack(),
         })
 
     def handle_no_permission(self):

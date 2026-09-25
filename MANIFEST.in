@@ -3,4 +3,5 @@ include README.md
 include AUTHORS
 recursive-include massactions/templates *
 recursive-include massactions/static *
+recursive-include massactions/locale *
 recursive-exclude massactions/tests *

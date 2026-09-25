@@ -1,6 +1,7 @@
 {% load i18n %}
 {% with ctx=mass_action_context %}
 {% if object_list %}
+    {% block mass_action_bar %}
     <div class="row justify-content-between mass-action-bar">
         {% if not selection_dropdown_disabled %}
             <div class="col-md d-flex flex-row px-2">
@@ -12,48 +13,44 @@
         <div class="col-md my-auto px-2 {% if not selection_dropdown_disabled %}text-center{% endif %}">
             <span class="selected-items {% block mass_action_selected_class %}text-muted{% endblock %}"></span>
         </div>
-        <div class="col-md px-2 text-end">
+        <div class="col-md px-2 text-end text-right">
             <div class="mass-actions-dropdown btn-group" role="group">
                 <button type="button" class="mass-actions-btn btn {% block mass_action_button_class %}btn-outline-secondary{% endblock %} dropdown-toggle px-2 py-1"
-                        data-bs-auto-close="outside" data-bs-toggle="dropdown" aria-expanded="false" id="id_mass_actions_btn">
+                        data-toggle="dropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" id="id_mass_actions_btn">
                     {% trans 'Actions' %}
                 </button>
-                <ul class="dropdown-menu">
+                {% block mass_action_menu %}
+                <div class="dropdown-menu">
+                    {% block mass_action_menu_items %}
                     {% block mass_action_menu_start %}{% endblock %}
                     {% if 'update' in ctx.actions %}
                         {% block mass_action_menu_update %}
                             {% for field in ctx.update_fields %}
                                 {% if not field.choices %}
-                                    <li>
-                                        <a href="#" class="dropdown-item mass-action-{{ ctx.key|slugify }}"
-                                           data-form-url="{% url 'massactions:mass_update' %}?key={{ ctx.key|urlencode }}&field_name={{ field.field_name|urlencode }}&back_url={{ request.get_full_path|urlencode }}">
-                                            <i class="fa fas fa-pen fa-fw me-2"></i>{{ field.localized_action }}
-                                        </a>
-                                    </li>
+                                    <a href="#" class="dropdown-item mass-action-{{ ctx.key|slugify }}"
+                                       data-form-url="{% url 'massactions:mass_update' %}?key={{ ctx.key|urlencode }}&field_name={{ field.field_name|urlencode }}&back_url={{ request.get_full_path|urlencode }}">
+                                        <i class="fa fas fa-pen fa-fw me-2 mr-2"></i>{{ field.localized_action }}
+                                    </a>
                                 {% elif field.choices|length == 1 %}
-                                    <li>
-                                        <a href="#" class="dropdown-item mass-action-{{ ctx.key|slugify }}"
-                                           data-form-url="{% url 'massactions:mass_update' %}?key={{ ctx.key|urlencode }}&field_name={{ field.field_name|urlencode }}&field_name_value={{ field.choices.0.0|urlencode }}&back_url={{ request.get_full_path|urlencode }}">
-                                            <i class="fa fas fa-pen fa-fw me-2"></i>{{ field.localized_action }}
-                                        </a>
-                                    </li>
+                                    <a href="#" class="dropdown-item mass-action-{{ ctx.key|slugify }}"
+                                       data-form-url="{% url 'massactions:mass_update' %}?key={{ ctx.key|urlencode }}&field_name={{ field.field_name|urlencode }}&field_name_value={{ field.choices.0.0|urlencode }}&back_url={{ request.get_full_path|urlencode }}">
+                                        <i class="fa fas fa-pen fa-fw me-2 mr-2"></i>{{ field.localized_action }}
+                                    </a>
                                 {% else %}
-                                    <li class="dropdown-submenu">
-                                        <a class="dropdown-item dropdown-toggle" href="#" data-bs-toggle="collapse"
-                                           data-bs-target="#{{ field.field_name|slugify }}_submenu" aria-expanded="false">
-                                            <i class="fa fas fa-pen fa-fw me-2"></i>{{ field.localized_action }}
+                                    <div class="dropdown-submenu">
+                                        <a class="dropdown-item dropdown-toggle mass-action-submenu-toggle" href="#"
+                                           data-target="#{{ field.field_name|slugify }}_submenu" aria-expanded="false">
+                                            <i class="fa fas fa-pen fa-fw me-2 mr-2"></i>{{ field.localized_action }}
                                         </a>
-                                        <ul class="collapse" id="{{ field.field_name|slugify }}_submenu">
+                                        <div class="collapse" id="{{ field.field_name|slugify }}_submenu">
                                             {% for choice in field.choices %}
-                                                <li>
-                                                    <a href="#" class="dropdown-item mass-action-{{ ctx.key|slugify }}"
-                                                       data-form-url="{% url 'massactions:mass_update' %}?key={{ ctx.key|urlencode }}&field_name={{ field.field_name|urlencode }}&field_name_value={{ choice.0|urlencode }}&back_url={{ request.get_full_path|urlencode }}">
-                                                        {{ choice.1 }}
-                                                    </a>
-                                                </li>
+                                                <a href="#" class="dropdown-item mass-action-{{ ctx.key|slugify }}"
+                                                   data-form-url="{% url 'massactions:mass_update' %}?key={{ ctx.key|urlencode }}&field_name={{ field.field_name|urlencode }}&field_name_value={{ choice.0|urlencode }}&back_url={{ request.get_full_path|urlencode }}">
+                                                    {{ choice.1 }}
+                                                </a>
                                             {% endfor %}
-                                        </ul>
-                                    </li>
+                                        </div>
+                                    </div>
                                 {% endif %}
                             {% endfor %}
                         {% endblock %}
@@ -61,19 +58,20 @@
                     {% block mass_action_menu_extra %}{% endblock %}
                     {% if 'delete' in ctx.actions %}
                         {% block mass_action_menu_delete %}
-                            <li>
-                                <a href="#" class="dropdown-item mass-action-{{ ctx.key|slugify }}" id="id_mass_action_delete"
-                                   data-form-url="{% url 'massactions:mass_delete' %}?key={{ ctx.key|urlencode }}&back_url={{ request.get_full_path|urlencode }}">
-                                    <i class="fa fas fa-trash fa-fw me-2 text-danger"></i>{% trans 'Delete' %}
-                                </a>
-                            </li>
+                            <a href="#" class="dropdown-item mass-action-{{ ctx.key|slugify }}" id="id_mass_action_delete"
+                               data-form-url="{% url 'massactions:mass_delete' %}?key={{ ctx.key|urlencode }}&back_url={{ request.get_full_path|urlencode }}">
+                                <i class="fa fas fa-trash fa-fw me-2 mr-2 text-danger"></i>{% trans 'Delete' %}
+                            </a>
                         {% endblock %}
                     {% endif %}
                     {% block mass_action_menu_end %}{% endblock %}
-                </ul>
+                    {% endblock %}
+                </div>
+                {% endblock %}
             </div>
         </div>
     </div>
+    {% endblock %}
     {% include 'massactions/helpers/crispy_modal_form_helper_mass_action.html' %}
 {% endif %}
 
@@ -96,6 +94,7 @@
         addSelectAllVisibleListener();
         addSelectAllListener();
         addClearAllListener();
+        addSubmenuToggleListener();
         addMassActionRedirectListener();
         addMassExportButtonListener();
     });
@@ -208,6 +207,15 @@
         $('.clear-all').on('click', function () {
             $('.mass-action-checkbox').prop("checked", false);
             resetSelection();
+        });
+    }
+
+    // a click inside the menu closes the dropdown (Bootstrap 4 always, Bootstrap 5 by default): toggle the submenu by hand
+    function addSubmenuToggleListener() {
+        $('.mass-action-submenu-toggle').on('click', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            $($(this).data('target')).collapse('toggle');
         });
     }
 

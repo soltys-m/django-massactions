@@ -1,0 +1,7 @@
+{% extends 'massactions/mass_action.html' %}
+
+{% block mass_action_bar %}
+    <div class="dropdown-menu" id="id_project_menu">
+        {% block mass_action_menu_items %}{{ block.super }}{% endblock %}
+    </div>
+{% endblock %}

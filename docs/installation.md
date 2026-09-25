@@ -1,12 +1,15 @@
 # Installation
 
 ```
-pip install django-massactions
+pip install django-massactions[bootstrap5]      # or [bootstrap4] with crispy-forms 2.x
 ```
 
-Requirements: Python ≥ 3.9, Django ≥ 4.2, django-crispy-forms ≥ 1.14 (1.x and 2.x), crispy-bootstrap5,
-django-bootstrap-modal-forms ≥ 2.2 (2.x and 3.x), pycryptodome. django-filter is optional (`filter_class`).
-The CI matrix covers Python 3.10 to 3.12 with Django 4.2, 5.0 and 5.1 (crispy 2.x stack) plus Django 4.2 with the crispy 1.x stack.
+Requirements: Python ≥ 3.9, Django ≥ 4.2, django-crispy-forms ≥ 1.13 (1.x and 2.x),
+django-bootstrap-modal-forms ≥ 2.2 (2.x and 3.x), pycryptodome. The crispy template pack of your Bootstrap
+version is an extra: `[bootstrap5]` installs `crispy-bootstrap5`, `[bootstrap4]` installs `crispy-bootstrap4`
+(crispy-forms 2.x only; crispy-forms 1.x ships the `bootstrap4` pack itself). django-filter is optional
+(`filter_class`). The CI matrix covers Python 3.10 to 3.12 with Django 4.2, 5.0 and 5.1 (crispy 2.x stack)
+plus Django 4.2 with the crispy 1.13 stack.
 
 ## Settings
 
@@ -16,13 +19,13 @@ INSTALLED_APPS = [
     'django.contrib.messages',      # success / error messages
     'django.contrib.sessions',
     'crispy_forms',
-    'crispy_bootstrap5',
+    'crispy_bootstrap5',                # 'crispy_bootstrap4' with crispy-forms 2.x; nothing for Bootstrap 4 with crispy-forms 1.x
     'bootstrap_modal_forms',
     'massactions',
 ]
 
 CRISPY_ALLOWED_TEMPLATE_PACKS = 'bootstrap5'
-CRISPY_TEMPLATE_PACK = 'bootstrap5'
+CRISPY_TEMPLATE_PACK = 'bootstrap5'   # 'bootstrap4' on a Bootstrap 4 page
 
 TEMPLATES = [{
     ...
@@ -52,7 +55,7 @@ reverse these names, so the namespace must be `massactions` (the default from `a
 
 ## Frontend
 
-The templates expect on the page: jQuery, Bootstrap 5 (dropdown, collapse, modal), Font Awesome icons,
+The templates expect on the page: jQuery, Bootstrap 4 or 5 (dropdown, collapse, modal), Font Awesome icons,
 [js-cookie](https://github.com/js-cookie/js-cookie) (`Cookies`) and the bundled fork of the
 django-bootstrap-modal-forms plugin:
 

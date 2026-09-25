@@ -1,6 +1,7 @@
-from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 from django.utils.module_loading import autodiscover_modules
+
+from massactions.settings import get_default_success_url
 
 
 class MassActionConfig:
@@ -89,7 +90,7 @@ class MassActionConfig:
 
     def get_success_url(self, request):
         """Fallback redirect target when ``back_url`` is missing or points to another host."""
-        return getattr(settings, 'MASSACTIONS_DEFAULT_SUCCESS_URL', '/')
+        return get_default_success_url()
 
 
 class MassActionRegistry:

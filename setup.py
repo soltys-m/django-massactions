@@ -17,12 +17,13 @@ setup(
     python_requires='>=3.9',
     install_requires=[
         'django>=4.2',
-        'django-crispy-forms>=1.14',
-        'crispy-bootstrap5',
+        'django-crispy-forms>=1.13',
         'django-bootstrap-modal-forms>=2.2',
         'pycryptodome',
     ],
     extras_require={
+        'bootstrap5': ['crispy-bootstrap5'],
+        'bootstrap4': ['crispy-bootstrap4'],
         'filters': ['django-filter'],
     },
     classifiers=[

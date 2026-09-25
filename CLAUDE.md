@@ -5,7 +5,7 @@ Guidance for Claude Code when working in this repository.
 ## What this is
 
 `django-massactions` is a reusable Django app: bulk actions on list views (checkbox selection incl.
-"select all" across pages, action dropdown, confirmation in a Bootstrap 5 modal, built-in delete and
+"select all" across pages, action dropdown, confirmation in a Bootstrap 4/5 modal, built-in delete and
 field update). It is distributed as a package, not a standalone project.
 
 ## Commands
@@ -19,7 +19,7 @@ python -m build                          # sdist + wheel (templates and static i
 ```
 
 Tests use an in-memory SQLite database and the test app `massactions.tests` (label `massactions_tests`).
-CI: `.github/workflows/tests.yml` (Python 3.10-3.12 x Django 4.2/5.0/5.1 with the crispy 2.x stack, plus Django 4.2 with crispy 1.x; pyflakes; build).
+CI: `.github/workflows/tests.yml` (Python 3.10-3.12 x Django 4.2/5.0/5.1 with the crispy 2.x stack, plus Django 4.2 with crispy 1.13; pyflakes; build).
 
 ## Architecture
 
@@ -33,9 +33,14 @@ CI: `.github/workflows/tests.yml` (Python 3.10-3.12 x Django 4.2/5.0/5.1 with th
   and the delete/update forms. `RawHTML` inserts rendered HTML without re-parsing it as a template.
 * `mixins.py` – `MassActionListViewMixin` puts `mass_action_context` into the list view context.
 * `helpers.py` – selection cookie (AES obfuscation, key travels with the value), parsing and cleaning.
-* `templates/massactions/` – action bar (`mass_action.html`, contains the selection JS), modal helper,
-  modal content. Projects extend them with `{% extends %}` and the documented blocks.
+* `settings.py` – app settings read at call time (`MASSACTIONS_AUTODISCOVER`, `MASSACTIONS_DEFAULT_SUCCESS_URL`).
+* `templates/massactions/` – action bar (`mass_action.html`, contains the selection JS), modal helper
+  (appends the modal container to `<body>`), modal content. One set of templates serves Bootstrap 4 and 5:
+  the markup carries both attribute sets, only the modal close button branches on `CRISPY_TEMPLATE_PACK`.
+  Projects extend them with `{% extends %}` and the documented blocks.
 * `static/massactions/js/` – fork of the django-bootstrap-modal-forms plugin (`showModal`, `initOnClick`).
+* `locale/` – message catalogs, `.mo` files are committed. Slovak is reviewed; cs, pl, hu, ro and de were generated
+  and not reviewed by native speakers.
 
 ## Conventions
 
@@ -44,4 +49,8 @@ CI: `.github/workflows/tests.yml` (Python 3.10-3.12 x Django 4.2/5.0/5.1 with th
 * Keep the webapp-agnostic: no project template tags, URL namespaces or queryset methods in the library.
   Project specifics go into config hooks (`get_queryset`, `restrict_queryset`, `has_permission`, ...).
 * Every behaviour change needs a test in `massactions/tests/`.
+* Markup must work with Bootstrap 4 and 5 from one template: write both spellings (`data-toggle` and
+  `data-bs-toggle`, `me-2 mr-2`), do not add template packs.
+* After changing translatable strings: `cd massactions && django-admin makemessages -a --ignore='tests/*'
+  --no-location && django-admin compilemessages` (needs GNU gettext) and commit the `.po` and `.mo` files.
 * Docs: `README.md` (overview and reference) and `docs/` (mkdocs). Update both when hooks or blocks change.

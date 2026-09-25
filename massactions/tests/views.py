@@ -20,5 +20,9 @@ class ItemOverrideListView(ItemListView):
     template_name = 'massactions_tests/item_list_override.html'
 
 
+class ItemMenuOnlyListView(ItemListView):
+    template_name = 'massactions_tests/item_list_menu_only.html'
+
+
 class MisconfiguredListView(ItemListView):
     mass_action_config = 'DoesNotExist'

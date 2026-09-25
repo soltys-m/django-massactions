@@ -1,0 +1,143 @@
+# django-massactions translations.
+# This file is distributed under the same license as the django-massactions package.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: django-massactions 0.1.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-09-25 09:55-0500\n"
+"PO-Revision-Date: 2026-09-25 12:00+0200\n"
+"Last-Translator: MS Code\n"
+"Language-Team: MS Code\n"
+"Language: hu\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+
+#, python-format
+msgid "Process objects of type: %s"
+msgstr ""
+
+msgid "Not possible to process any of the selected objects."
+msgstr "A kiválasztott elemek közül egyiket sem lehet feldolgozni."
+
+msgid "Delete"
+msgstr "Töröl"
+
+#, python-format
+msgid "Delete objects of type: %s"
+msgstr "Törölje ki az objektumot: %s"
+
+msgid ""
+"Deleting the selected objects requires deleting the following related "
+"objects:"
+msgstr ""
+"A kijelölt objektumok törléséhez a következő kapcsolódó objektumok törlése "
+"szükséges:"
+
+#, python-format
+msgid "Are you sure you want to delete %(count)d object?"
+msgid_plural "Are you sure you want to delete %(count)d objects?"
+msgstr[0] "Biztosan szeretne törölni%(count)d tételt?"
+msgstr[1] "Biztosan szeretne törölni%(count)d tételt?"
+
+msgid "Update"
+msgstr "Frissítés"
+
+#, python-format
+msgid "Update objects of type: %s"
+msgstr "Frissítse az objektumot: %s"
+
+#, python-format
+msgid "Are you sure you want to update '%(field_name)s' of this object?"
+msgid_plural ""
+"Are you sure you want to update '%(field_name)s' of %(count)d objects?"
+msgstr[0] ""
+"Biztos, hogy ennek az objektumnak a '%(field_name)s'-jét szeretné "
+"frissíteni?"
+msgstr[1] ""
+"Biztos, hogy a %(count)d objektum '%(field_name)s'-jét akarja frissíteni?"
+
+msgid "Close"
+msgstr "Bezárás"
+
+msgid "Actions"
+msgstr "Akciók"
+
+msgid "Number of selected items"
+msgstr "Kiválasztott tételek száma"
+
+msgid "Following objects will be deleted"
+msgstr "A következő objektumok törölve lesznek"
+
+msgid "Following objects will be updated"
+msgstr "A következő objektumok frissítve lesznek"
+
+msgid "Following objects will be processed"
+msgstr ""
+
+msgid "Missing permissions to delete"
+msgstr "Hiányzik a törléshez való engedély"
+
+msgid "Missing permissions to update"
+msgstr "Hiányzik a frissítéshez való engedély"
+
+msgid "Missing permissions to process"
+msgstr ""
+
+msgid "Select"
+msgstr "Kiválaszt"
+
+msgid "Select visible"
+msgstr "Láthatók kiválasztása"
+
+msgid "Select all"
+msgstr "Összes kiválasztása"
+
+msgid "Clear all"
+msgstr "Összes kijelölés törlése"
+
+msgctxt "url"
+msgid "delete/"
+msgstr "torles/"
+
+msgctxt "url"
+msgid "update/"
+msgstr "frissites/"
+
+msgid "You do not have permission to perform this action."
+msgstr "Nincs jogosultsága a művelet végrehajtásához."
+
+msgid "Your session has expired. Please, log in again."
+msgstr ""
+
+msgid "Please, select an object first."
+msgstr "Kérjük, először válasszon ki egy objektumot."
+
+msgid "Login required"
+msgstr ""
+
+msgid "Permission missing"
+msgstr "Hiányzó engedély"
+
+msgid "No object selected"
+msgstr "Nincs kiválasztott objektum"
+
+msgid ""
+"Objects could not be deleted, because they are associated with other "
+"objects."
+msgstr ""
+"Az objektumokat nem lehetett törölni, mert más objektumokhoz kapcsolódnak."
+
+#, python-format
+msgid "%(count)d object was successfully deleted."
+msgid_plural "%(count)d objects were successfully deleted."
+msgstr[0] "%(count)d objektum sikeresen törölve."
+msgstr[1] "%(count)d objektum sikeresen törölve."
+
+#, python-format
+msgid "%(count)d object was successfully updated."
+msgid_plural "%(count)d objects were successfully updated."
+msgstr[0] "%(count)d objektum sikeresen frissítve."
+msgstr[1] "%(count)d objektum sikeresen frissítve."

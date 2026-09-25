@@ -1,0 +1,149 @@
+# django-massactions translations.
+# This file is distributed under the same license as the django-massactions package.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: django-massactions 0.1.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-09-25 09:55-0500\n"
+"PO-Revision-Date: 2026-09-25 12:00+0200\n"
+"Last-Translator: MS Code\n"
+"Language-Team: MS Code\n"
+"Language: ro\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=n==1 ? 0 : (n==0 || (n%100 > 0 && n%100 < 20)) ? 1 : 2;\n"
+
+#, python-format
+msgid "Process objects of type: %s"
+msgstr ""
+
+msgid "Not possible to process any of the selected objects."
+msgstr "Nu este posibil să se proceseze niciunul dintre obiectele selectate."
+
+msgid "Delete"
+msgstr "Ștergeți"
+
+#, python-format
+msgid "Delete objects of type: %s"
+msgstr "Șterge obiectul: %s"
+
+msgid ""
+"Deleting the selected objects requires deleting the following related "
+"objects:"
+msgstr ""
+"Ștergerea obiectelor selectate necesită ștergerea următoarelor obiecte "
+"asociate:"
+
+#, python-format
+msgid "Are you sure you want to delete %(count)d object?"
+msgid_plural "Are you sure you want to delete %(count)d objects?"
+msgstr[0] "Sunteți sigur că doriți să ștergeți %(count)d obiect?"
+msgstr[1] "Sunteți sigur că doriți să ștergeți %(count)d obiecte?"
+msgstr[2] "Sunteți sigur că doriți să ștergeți %(count)d de obiecte?"
+
+msgid "Update"
+msgstr "Actualizare"
+
+#, python-format
+msgid "Update objects of type: %s"
+msgstr "Actualizarea tipul obiectelor: %s"
+
+#, python-format
+msgid "Are you sure you want to update '%(field_name)s' of this object?"
+msgid_plural ""
+"Are you sure you want to update '%(field_name)s' of %(count)d objects?"
+msgstr[0] ""
+"Sunteți sigur că doriți să actualizați \"%(field_name)s\" din acest obiect?"
+msgstr[1] ""
+"Sunteți sigur că doriți să actualizați \"%(field_name)s\" din %(count)d "
+"obiecte?"
+msgstr[2] ""
+"Sunteți sigur că doriți să actualizați \"%(field_name)s\" din %(count)d de "
+"obiecte?"
+
+msgid "Close"
+msgstr "Închideți"
+
+msgid "Actions"
+msgstr "Acțiuni"
+
+msgid "Number of selected items"
+msgstr "Numărul de elemente selectate"
+
+msgid "Following objects will be deleted"
+msgstr "Următoarele obiecte vor fi șterse"
+
+msgid "Following objects will be updated"
+msgstr "Următoarele obiecte vor fi actualizate"
+
+msgid "Following objects will be processed"
+msgstr ""
+
+msgid "Missing permissions to delete"
+msgstr "Lipsă de permisiune pentru a șterge"
+
+msgid "Missing permissions to update"
+msgstr "Lipsă de permisiune pentru actualizare"
+
+msgid "Missing permissions to process"
+msgstr ""
+
+msgid "Select"
+msgstr "Selectați"
+
+msgid "Select visible"
+msgstr "Selectați vizibile"
+
+msgid "Select all"
+msgstr "Selectați toate"
+
+msgid "Clear all"
+msgstr "Deselectați toate"
+
+msgctxt "url"
+msgid "delete/"
+msgstr "stergere/"
+
+msgctxt "url"
+msgid "update/"
+msgstr "actualizare/"
+
+msgid "You do not have permission to perform this action."
+msgstr "Nu aveți permisiunea de a efectua această acțiune."
+
+msgid "Your session has expired. Please, log in again."
+msgstr ""
+
+msgid "Please, select an object first."
+msgstr "Vă rugăm să selectați mai întâi un obiect."
+
+msgid "Login required"
+msgstr ""
+
+msgid "Permission missing"
+msgstr "Lipsește permisiunea"
+
+msgid "No object selected"
+msgstr "Niciun obiect selectat"
+
+msgid ""
+"Objects could not be deleted, because they are associated with other "
+"objects."
+msgstr ""
+"Obiectele nu au putut fi șterse, deoarece sunt asociate cu alte obiecte."
+
+#, python-format
+msgid "%(count)d object was successfully deleted."
+msgid_plural "%(count)d objects were successfully deleted."
+msgstr[0] "%(count)d obiect a fost șters cu succes."
+msgstr[1] "%(count)d obiecte au fost șterse cu succes."
+msgstr[2] "%(count)d de obiecte au fost șterse cu succes."
+
+#, python-format
+msgid "%(count)d object was successfully updated."
+msgid_plural "%(count)d objects were successfully updated."
+msgstr[0] "%(count)d obiect a fost actualizat cu succes."
+msgstr[1] "%(count)d obiecte au fost actualizate cu succes."
+msgstr[2] "%(count)d de obiecte au fost actualizate cu succes."

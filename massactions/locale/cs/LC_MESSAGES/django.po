@@ -1,0 +1,149 @@
+# django-massactions translations.
+# This file is distributed under the same license as the django-massactions package.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: django-massactions 0.1.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-09-25 09:55-0500\n"
+"PO-Revision-Date: 2026-09-25 12:00+0200\n"
+"Last-Translator: MS Code\n"
+"Language-Team: MS Code\n"
+"Language: cs\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=4; plural=(n == 1 && n % 1 == 0) ? 0 : (n >= 2 && n <= 4 && n % 1 == 0) ? 1: (n % 1 != 0 ) ? 2 : 3;\n"
+
+#, python-format
+msgid "Process objects of type: %s"
+msgstr "Zpracovat objekty typu: %s"
+
+msgid "Not possible to process any of the selected objects."
+msgstr "Není možné zpracovat žádný z vybraných objektů."
+
+msgid "Delete"
+msgstr "Odstranit"
+
+#, python-format
+msgid "Delete objects of type: %s"
+msgstr "Smazat objekty typu: %s"
+
+msgid ""
+"Deleting the selected objects requires deleting the following related "
+"objects:"
+msgstr ""
+"Smazání vybraných objektů vyžaduje smazání následujících souvisejících "
+"objektů:"
+
+#, python-format
+msgid "Are you sure you want to delete %(count)d object?"
+msgid_plural "Are you sure you want to delete %(count)d objects?"
+msgstr[0] "Opravdu chcete smazat %(count)d objekt?"
+msgstr[1] "Opravdu chcete smazat %(count)d objekty?"
+msgstr[2] "Opravdu chcete smazat %(count)d objektů?"
+msgstr[3] "Opravdu chcete smazat %(count)d objektů?"
+
+msgid "Update"
+msgstr "Aktualizovat"
+
+#, python-format
+msgid "Update objects of type: %s"
+msgstr "Změnit objekty typu: %s"
+
+#, python-format
+msgid "Are you sure you want to update '%(field_name)s' of this object?"
+msgid_plural ""
+"Are you sure you want to update '%(field_name)s' of %(count)d objects?"
+msgstr[0] "Opravdu chcete změnit '%(field_name)s' tohoto objektu?"
+msgstr[1] "Opravdu chcete změnit '%(field_name)s' %(count)d objektů?"
+msgstr[2] ""
+"Are you sure you want to update '%(field_name)s' %(count)d objektů?"
+msgstr[3] ""
+"Are you sure you want to update '%(field_name)s' %(count)d objektů?"
+
+msgid "Close"
+msgstr "Zavřít"
+
+msgid "Actions"
+msgstr "Akce"
+
+msgid "Number of selected items"
+msgstr "Počet vybraných položek"
+
+msgid "Following objects will be deleted"
+msgstr "Následující objekty budou smazány"
+
+msgid "Following objects will be updated"
+msgstr "Následující objekty budou změněny"
+
+msgid "Following objects will be processed"
+msgstr "Následující objekty budou zpracovány"
+
+msgid "Missing permissions to delete"
+msgstr "Chybí povolení ke smazání"
+
+msgid "Missing permissions to update"
+msgstr "Chybí povolení ke změně"
+
+msgid "Missing permissions to process"
+msgstr "Chybějící oprávnění ke zpracování"
+
+msgid "Select"
+msgstr "Vybrat"
+
+msgid "Select visible"
+msgstr "Označit viditelné"
+
+msgid "Select all"
+msgstr "Vybrat vše"
+
+msgid "Clear all"
+msgstr "Odznačit všechny"
+
+msgctxt "url"
+msgid "delete/"
+msgstr "smazat/"
+
+msgctxt "url"
+msgid "update/"
+msgstr "zmenit/"
+
+msgid "You do not have permission to perform this action."
+msgstr "K provedení této akce nemáte oprávnění."
+
+msgid "Your session has expired. Please, log in again."
+msgstr "Vaše relace vypršela. Přihlaste se prosím znovu."
+
+msgid "Please, select an object first."
+msgstr "Nejprve prosím vyberte objekt."
+
+msgid "Login required"
+msgstr "Vyžaduje se přihlášení"
+
+msgid "Permission missing"
+msgstr "Chybí povolení"
+
+msgid "No object selected"
+msgstr "Žádný vybraný objekt"
+
+msgid ""
+"Objects could not be deleted, because they are associated with other "
+"objects."
+msgstr "Objekty nelze smazat, protože jsou navázány s jinými objekty."
+
+#, python-format
+msgid "%(count)d object was successfully deleted."
+msgid_plural "%(count)d objects were successfully deleted."
+msgstr[0] "%(count)d objekt byl úspěšně smazán."
+msgstr[1] "%(count)d objekty byly úspěšně smazány."
+msgstr[2] "%(count)d objektů bylo úspěšně smazáno."
+msgstr[3] "%(count)d objektů bylo úspěšně smazáno."
+
+#, python-format
+msgid "%(count)d object was successfully updated."
+msgid_plural "%(count)d objects were successfully updated."
+msgstr[0] "%(count)d objekt byl úspěšně změněn."
+msgstr[1] "%(count)d objekty byly úspěšně změněny."
+msgstr[2] "%(count)d objektů bylo úspěšně změněno."
+msgstr[3] "%(count)d objektů bylo úspěšně změněno."

@@ -2,12 +2,12 @@
 <div>
     <div class="btn-group select-items">
         {% if is_table %}
-            <button type="button" class="btn {{ button_class|default:'btn-outline-secondary' }} dropdown-toggle" data-bs-toggle="dropdown"
-                    aria-haspopup="true" aria-expanded="false" id="id_mass_action_selection_table">
+            <button type="button" class="btn {{ button_class|default:'btn-outline-secondary' }} dropdown-toggle"
+                    data-toggle="dropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" id="id_mass_action_selection_table">
             </button>
         {% else %}
-            <button type="button" class="btn {{ button_class|default:'btn-outline-secondary' }} dropdown-toggle px-2 py-1" data-bs-toggle="dropdown"
-                    aria-haspopup="true" aria-expanded="false" id="id_mass_action_selection">{% trans 'Select' %}
+            <button type="button" class="btn {{ button_class|default:'btn-outline-secondary' }} dropdown-toggle px-2 py-1"
+                    data-toggle="dropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" id="id_mass_action_selection">{% trans 'Select' %}
             </button>
         {% endif %}
         <div class="dropdown-menu">

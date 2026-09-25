@@ -1,0 +1,137 @@
+# django-massactions translations.
+# This file is distributed under the same license as the django-massactions package.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: django-massactions 0.1.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-09-25 09:55-0500\n"
+"PO-Revision-Date: 2026-09-25 12:00+0200\n"
+"Last-Translator: MS Code\n"
+"Language-Team: MS Code\n"
+"Language: de\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+
+#, python-format
+msgid "Process objects of type: %s"
+msgstr ""
+
+msgid "Not possible to process any of the selected objects."
+msgstr ""
+
+msgid "Delete"
+msgstr "Löschen"
+
+#, python-format
+msgid "Delete objects of type: %s"
+msgstr ""
+
+msgid ""
+"Deleting the selected objects requires deleting the following related "
+"objects:"
+msgstr ""
+
+#, python-format
+msgid "Are you sure you want to delete %(count)d object?"
+msgid_plural "Are you sure you want to delete %(count)d objects?"
+msgstr[0] ""
+msgstr[1] ""
+
+msgid "Update"
+msgstr "Aktualisieren"
+
+#, python-format
+msgid "Update objects of type: %s"
+msgstr ""
+
+#, python-format
+msgid "Are you sure you want to update '%(field_name)s' of this object?"
+msgid_plural ""
+"Are you sure you want to update '%(field_name)s' of %(count)d objects?"
+msgstr[0] ""
+msgstr[1] ""
+
+msgid "Close"
+msgstr ""
+
+msgid "Actions"
+msgstr "Aktionen"
+
+msgid "Number of selected items"
+msgstr ""
+
+msgid "Following objects will be deleted"
+msgstr ""
+
+msgid "Following objects will be updated"
+msgstr ""
+
+msgid "Following objects will be processed"
+msgstr ""
+
+msgid "Missing permissions to delete"
+msgstr ""
+
+msgid "Missing permissions to update"
+msgstr ""
+
+msgid "Missing permissions to process"
+msgstr ""
+
+msgid "Select"
+msgstr ""
+
+msgid "Select visible"
+msgstr ""
+
+msgid "Select all"
+msgstr "Alle auswählen"
+
+msgid "Clear all"
+msgstr ""
+
+msgctxt "url"
+msgid "delete/"
+msgstr ""
+
+msgctxt "url"
+msgid "update/"
+msgstr ""
+
+msgid "You do not have permission to perform this action."
+msgstr ""
+
+msgid "Your session has expired. Please, log in again."
+msgstr ""
+
+msgid "Please, select an object first."
+msgstr ""
+
+msgid "Login required"
+msgstr ""
+
+msgid "Permission missing"
+msgstr ""
+
+msgid "No object selected"
+msgstr ""
+
+msgid ""
+"Objects could not be deleted, because they are associated with other "
+"objects."
+msgstr ""
+
+#, python-format
+msgid "%(count)d object was successfully deleted."
+msgid_plural "%(count)d objects were successfully deleted."
+msgstr[0] ""
+msgstr[1] ""
+
+#, python-format
+msgid "%(count)d object was successfully updated."
+msgid_plural "%(count)d objects were successfully updated."
+msgstr[0] ""
+msgstr[1] ""

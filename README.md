@@ -3,7 +3,7 @@
 [![tests](https://github.com/soltys-m/django-massactions/actions/workflows/tests.yml/badge.svg)](https://github.com/soltys-m/django-massactions/actions/workflows/tests.yml)
 
 Mass (bulk) actions for Django list views: users select rows with checkboxes (or "select all"
-across pages), pick an action from a dropdown and confirm it in a Bootstrap 5 modal. Built-in
+across pages), pick an action from a dropdown and confirm it in a Bootstrap modal (Bootstrap 4 and 5). Built-in
 actions: **delete** and **update a field**. Custom actions plug into the same selection mechanism.
 
 ## How it works
@@ -21,11 +21,13 @@ actions: **delete** and **update a field**. Custom actions plug into the same se
 
 ## Requirements
 
-* Django >= 4.2, django-crispy-forms >= 1.14 (1.x and 2.x), crispy-bootstrap5,
-  django-bootstrap-modal-forms >= 2.2 (2.x and 3.x), pycryptodome. CI runs the suite on Python 3.10 to 3.12
-  with Django 4.2, 5.0 and 5.1 (crispy 2.x stack) and on Django 4.2 with the crispy 1.x stack.
+* Django >= 4.2, django-crispy-forms >= 1.13 (1.x and 2.x), django-bootstrap-modal-forms >= 2.2 (2.x and 3.x),
+  pycryptodome. The crispy template pack of your Bootstrap version: `crispy-bootstrap5` (extra `[bootstrap5]`)
+  or, for Bootstrap 4 with crispy-forms 2.x, `crispy-bootstrap4` (extra `[bootstrap4]`; crispy-forms 1.x ships
+  the `bootstrap4` pack itself). CI runs the suite on Python 3.10 to 3.12 with Django 4.2, 5.0 and 5.1
+  (crispy 2.x stack) and on Django 4.2 with the crispy 1.13 stack.
 * Optional: django-filter (for `filter_class`)
-* Frontend: jQuery, Bootstrap 5, Font Awesome (icons), [js-cookie](https://github.com/js-cookie/js-cookie)
+* Frontend: jQuery, Bootstrap 4 or 5, Font Awesome (icons), [js-cookie](https://github.com/js-cookie/js-cookie)
   and the **bundled fork** of the modal forms plugin:
   `{% static 'massactions/js/jquery.bootstrap.modal.forms.js' %}` (adds `showModal()` and
   `initOnClick`, which the stock plugin does not have). Use it instead of the plugin's own JS file.
@@ -34,20 +36,20 @@ actions: **delete** and **update a field**. Custom actions plug into the same se
 ## Installation
 
 ```
-pip install django-massactions
+pip install django-massactions[bootstrap5]      # or [bootstrap4] with crispy-forms 2.x
 ```
 
 ```python
 INSTALLED_APPS = [
     ...
     'crispy_forms',
-    'crispy_bootstrap5',
+    'crispy_bootstrap5',                # 'crispy_bootstrap4' with crispy-forms 2.x; nothing for Bootstrap 4 with crispy-forms 1.x
     'bootstrap_modal_forms',
     'massactions',
 ]
 
 CRISPY_ALLOWED_TEMPLATE_PACKS = 'bootstrap5'
-CRISPY_TEMPLATE_PACK = 'bootstrap5'
+CRISPY_TEMPLATE_PACK = 'bootstrap5'   # 'bootstrap4' on a Bootstrap 4 page
 ```
 
 ```python
@@ -182,21 +184,20 @@ class MassArchiveView(BSModalMassActionViewMixin):
 
 {% block mass_action_menu_extra %}
     {% if 'archive' in ctx.actions %}
-        <li>
-            <a href="#" class="dropdown-item mass-action-{{ ctx.key|slugify }}"
-               data-form-url="{% url 'myapp:mass_archive' %}?key={{ ctx.key|urlencode }}&back_url={{ request.get_full_path|urlencode }}">
-                {% trans 'Archive' %}
-            </a>
-        </li>
+        <a href="#" class="dropdown-item mass-action-{{ ctx.key|slugify }}"
+           data-form-url="{% url 'myapp:mass_archive' %}?key={{ ctx.key|urlencode }}&back_url={{ request.get_full_path|urlencode }}">
+            {% trans 'Archive' %}
+        </a>
     {% endif %}
 {% endblock %}
 ```
 
 Include your template instead of `massactions/mass_action.html`. Available blocks:
-`mass_action_selection`, `mass_action_selected_class`, `mass_action_button_class`,
-`mass_action_menu_start`, `mass_action_menu_update`, `mass_action_menu_extra`,
-`mass_action_menu_delete`, `mass_action_menu_end`, `mass_action_js_extra`. The selection dropdown
-template takes `button_class` (default `btn-outline-secondary`).
+`mass_action_bar` (the whole bar), `mass_action_selection`, `mass_action_selected_class`,
+`mass_action_button_class`, `mass_action_menu` (the `dropdown-menu` element), `mass_action_menu_items`,
+`mass_action_menu_start`, `mass_action_menu_update`, `mass_action_menu_extra`, `mass_action_menu_delete`,
+`mass_action_menu_end`, `mass_action_js_extra`. The selection dropdown template takes `button_class`
+(default `btn-outline-secondary`).
 The modal content template `massactions/mass_action_modal_content.html` has
 `mass_action_modal_heading`, `mass_action_modal_not_allowed_heading` and `mass_action_modal_extra`.
 
@@ -209,6 +210,37 @@ Two flavours of menu links are supported by the page script:
 
 Views that are not modals can use `MassActionViewMixin` directly; set `action` or `permission_required`.
 `window.massActions[key].resetSelection()` is available to project scripts.
+
+When a modal has been loaded and shown, the page triggers `massactions:modal-shown` on `document` with the
+modal element, the config key and the form URL, so project scripts can initialise widgets in the form
+(date pickers, select2, ...):
+
+```js
+$(document).on('massactions:modal-shown', function (event, modal, key, formUrl) {
+    init_date_and_time_pickers($(modal));
+});
+```
+
+## Bootstrap 4 and 5
+
+The templates carry both attribute sets side by side (`data-toggle="dropdown" data-bs-toggle="dropdown"`,
+`text-end text-right`, `me-2 mr-2`, ...); each Bootstrap version ignores the other's. The only markup that
+differs, the close button of the modal header, follows `CRISPY_TEMPLATE_PACK` (`bootstrap4` renders the
+`close` button, anything else `btn-close`; with crispy-forms 2.x the `bootstrap4` pack comes from the
+`crispy-bootstrap4` package). The modal container is appended to `<body>` by the helper script (an existing
+`#modal` element on the page is reused and has to contain a `.crispy-modal-content` element), so
+`massactions/mass_action.html` can be included anywhere, also inside an existing dropdown menu:
+
+```django
+{% extends 'massactions/mass_action.html' %}
+
+{% block mass_action_bar %}
+    {% block mass_action_menu_items %}{{ block.super }}{% endblock %}
+{% endblock %}
+```
+
+renders only the menu items (`<a class="dropdown-item">`); include the selection dropdown with
+`is_table=True` in the table header.
 
 ## Views
 
@@ -236,6 +268,15 @@ permission, is not logged in or has nothing selected.
 * The selection cookie is obfuscated (AES with the key appended), not authenticated. Do not treat it as
   trusted input: `get_queryset()` / `restrict_queryset()` are the authorization boundary.
 * Object names are inserted into the modal as escaped HTML, not re-parsed as templates.
+
+## Translations
+
+The package ships message catalogs in `massactions/locale/` (Slovak, Czech and Polish complete; Hungarian and
+Romanian nearly complete; German only started; apart from Slovak they are not reviewed by native speakers).
+Regenerate with
+`cd massactions && django-admin makemessages -a --ignore='tests/*' --no-location` and compile with
+`django-admin compilemessages` (or `msgfmt`). Projects that translated these strings before can drop them
+from their own catalogs; Django finds the app catalog automatically.
 
 ## Tests
 

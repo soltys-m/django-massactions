@@ -11,4 +11,4 @@ class MassActionItemForm(BSModalMassUpdateForm):
 
     def build_form_fields(self):
         self.fields['status'].initial = self.field_name_value
-        return [Div('status', css_class='visually-hidden'), Div('note')]
+        return [Div('status', css_class='d-none'), Div('note')]

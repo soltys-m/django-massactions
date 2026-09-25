@@ -3,7 +3,7 @@
 Mass (bulk) actions for Django list views.
 
 Users select rows with checkboxes or "select all" (across pages, respecting the active list filter),
-choose an action from a dropdown and confirm it in a Bootstrap 5 modal. The package ships two actions,
+choose an action from a dropdown and confirm it in a Bootstrap modal (Bootstrap 4 and 5). The package ships two actions,
 **delete** and **update a field**, and the plumbing for your own.
 
 ## Flow

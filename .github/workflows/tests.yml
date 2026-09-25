@@ -17,7 +17,7 @@ jobs:
         django-version: ['4.2', '5.0', '5.1']
         crispy-stack: ['current']
         include:
-          # the stack pinned in transportly: django-crispy-forms 1.x, crispy-bootstrap5 0.x, modal forms 2.x
+          # the oldest supported stack: django-crispy-forms 1.13, crispy-bootstrap5 0.x, modal forms 2.x
           - python-version: '3.12'
             django-version: '4.2'
             crispy-stack: 'legacy'
@@ -47,7 +47,7 @@ jobs:
       - name: Install crispy stack (legacy)
         if: matrix.crispy-stack == 'legacy'
         run: |
-          pip install "django-crispy-forms>=1.14,<2" "crispy-bootstrap5<0.8" "django-bootstrap-modal-forms>=2.2,<3"
+          pip install "django-crispy-forms==1.13.*" "crispy-bootstrap5<0.8" "django-bootstrap-modal-forms>=2.2,<3"
 
       - name: Install package
         run: |

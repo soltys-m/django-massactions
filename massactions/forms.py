@@ -63,6 +63,7 @@ class MassActionModalContentLayout(LayoutObject):
             'modal_body': self.modal_body,
             'fields': fields,
             'form_style': form_style,
+            'template_pack': template_pack,
         })
 
 
@@ -246,7 +247,7 @@ class BSModalMassUpdateForm(BSModalMassActionFormMixin):
         form_field.required = False
         form_field.initial = self.field_name_value
         self.fields[self.field_name] = form_field
-        return [Div(self.field_name, css_class='visually-hidden')]
+        return [Div(self.field_name, css_class='d-none')]
 
     def clean(self):
         cleaned_data = super().clean()

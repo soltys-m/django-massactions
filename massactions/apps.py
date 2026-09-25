@@ -1,5 +1,6 @@
 from django.apps import AppConfig
-from django.conf import settings
+
+from massactions.settings import get_autodiscover
 
 
 class MassActionsConfig(AppConfig):
@@ -7,6 +8,6 @@ class MassActionsConfig(AppConfig):
     verbose_name = 'Mass actions'
 
     def ready(self):
-        if getattr(settings, 'MASSACTIONS_AUTODISCOVER', True):
+        if get_autodiscover():
             from massactions.registry import autodiscover
             autodiscover()
