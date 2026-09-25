@@ -39,6 +39,12 @@ actions: **delete** and **update a field**. Custom actions plug into the same se
 pip install django-massactions[bootstrap5]      # or [bootstrap4] with crispy-forms 2.x
 ```
 
+Until the package is on PyPI, or to pin a specific release from GitHub:
+
+```
+django-massactions @ git+https://github.com/soltys-m/django-massactions.git@v0.1.0
+```
+
 ```python
 INSTALLED_APPS = [
     ...

@@ -54,3 +54,10 @@ CI: `.github/workflows/tests.yml` (Python 3.10-3.12 x Django 4.2/5.0/5.1 with th
 * After changing translatable strings: `cd massactions && django-admin makemessages -a --ignore='tests/*'
   --no-location && django-admin compilemessages` (needs GNU gettext) and commit the `.po` and `.mo` files.
 * Docs: `README.md` (overview and reference) and `docs/` (mkdocs). Update both when hooks or blocks change.
+
+## Releasing
+
+1. Bump `VERSION` in `massactions/__init__.py`, turn the "unreleased" heading in `CHANGELOG.md` into the version and date.
+2. Commit, then `git tag -a v<version> -m "v<version>"` and `git push origin main v<version>`.
+3. `.github/workflows/release.yml` builds the package, attaches the wheel to the GitHub release and publishes to PyPI
+   (trusted publishing, environment `pypi`). Projects pin the tag (`git+...@v<version>`) or the PyPI version.
