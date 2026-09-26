@@ -21,6 +21,7 @@ class MassActionConfig:
     filter_class = None              # optional django-filter FilterSet applied with the list's query string
     update_form_class = None         # optional BSModalMassUpdateForm subclass used by the update action
     permission_map = {'update': 'change'}
+    modal_object_limit = 100         # objects listed in the confirmation modal, the rest is shown as a count (0 = all)
 
     def __init__(self):
         if self.model is None:
@@ -76,6 +77,16 @@ class MassActionConfig:
         for name, value in values.items():
             setattr(obj, name, value)
         obj.save()
+
+    # -- confirmation modal ------------------------------------------------------------------------------------------
+
+    def get_object_label(self, obj):
+        """Text shown for one selected object in the confirmation modal."""
+        return str(obj)
+
+    def get_object_url(self, obj):
+        """Link of one selected object in the confirmation modal; ``None`` renders plain text."""
+        return obj.get_absolute_url() if hasattr(obj, 'get_absolute_url') else None
 
     # -- delete action -----------------------------------------------------------------------------------------------
 

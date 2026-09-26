@@ -1,9 +1,28 @@
+{% load i18n massactions %}
+{% massaction_object_listing object_list config=config columns=columns|default:3 as listing %}
 <div class="mass-action-items">
-    {% for object in object_list %}
-        {% if object.get_absolute_url %}
-            <a href="{{ object.get_absolute_url }}" target="_blank">{{ object }}</a>
-        {% else %}
-            <span>{{ object }}</span>
-        {% endif %}
-    {% endfor %}
+    <div class="row">
+        {% for column in listing.columns %}
+            <ul class="col-sm-6 col-md list-unstyled mb-0">
+                {% for label, url in column %}
+                    <li>
+                        {% if url %}
+                            <a href="{{ url }}" target="_blank">{{ label }}</a>
+                        {% else %}
+                            {{ label }}
+                        {% endif %}
+                    </li>
+                {% endfor %}
+            </ul>
+        {% endfor %}
+    </div>
+    {% if listing.more %}
+        <p class="text-muted mb-0">
+            {% blocktrans count counter=listing.more trimmed %}
+                and {{ counter }} more object
+            {% plural %}
+                and {{ counter }} more objects
+            {% endblocktrans %}
+        </p>
+    {% endif %}
 </div>

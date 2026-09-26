@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: django-massactions 0.1.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-25 09:55-0500\n"
+"POT-Creation-Date: 2026-09-26 12:43+0200\n"
 "PO-Revision-Date: 2026-09-25 12:00+0200\n"
 "Last-Translator: MS Code\n"
 "Language-Team: MS Code\n"
@@ -81,6 +81,12 @@ msgstr ""
 msgid "Missing permissions to process"
 msgstr ""
 
+#, python-format
+msgid "and %(counter)s more object"
+msgid_plural "and %(counter)s more objects"
+msgstr[0] ""
+msgstr[1] ""
+
 msgid "Select"
 msgstr ""
 
@@ -120,8 +126,7 @@ msgid "No object selected"
 msgstr ""
 
 msgid ""
-"Objects could not be deleted, because they are associated with other "
-"objects."
+"Objects could not be deleted, because they are associated with other objects."
 msgstr ""
 
 #, python-format

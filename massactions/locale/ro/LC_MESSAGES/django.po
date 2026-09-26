@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: django-massactions 0.1.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-25 09:55-0500\n"
+"POT-Creation-Date: 2026-09-26 12:43+0200\n"
 "PO-Revision-Date: 2026-09-25 12:00+0200\n"
 "Last-Translator: MS Code\n"
 "Language-Team: MS Code\n"
@@ -13,7 +13,8 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=3; plural=n==1 ? 0 : (n==0 || (n%100 > 0 && n%100 < 20)) ? 1 : 2;\n"
+"Plural-Forms: nplurals=3; plural=n==1 ? 0 : (n==0 || (n%100 > 0 && n%100 < "
+"20)) ? 1 : 2;\n"
 
 #, python-format
 msgid "Process objects of type: %s"
@@ -90,6 +91,13 @@ msgstr "Lipsă de permisiune pentru actualizare"
 msgid "Missing permissions to process"
 msgstr ""
 
+#, python-format
+msgid "and %(counter)s more object"
+msgid_plural "and %(counter)s more objects"
+msgstr[0] ""
+msgstr[1] ""
+msgstr[2] ""
+
 msgid "Select"
 msgstr "Selectați"
 
@@ -129,8 +137,7 @@ msgid "No object selected"
 msgstr "Niciun obiect selectat"
 
 msgid ""
-"Objects could not be deleted, because they are associated with other "
-"objects."
+"Objects could not be deleted, because they are associated with other objects."
 msgstr ""
 "Obiectele nu au putut fi șterse, deoarece sunt asociate cu alte obiecte."
 

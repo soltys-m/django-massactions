@@ -44,6 +44,7 @@ One model can have several configs with different keys (for example `Customer` a
 | `filter_class` | `None` | django-filter `FilterSet` applied with the query string of `back_url`, so "select all" acts on the filtered list. |
 | `update_form_class` | `None` | `BSModalMassUpdateForm` subclass for the update action. |
 | `permission_map` | `{'update': 'change'}` | Action name → permission codename prefix. |
+| `modal_object_limit` | `100` | Objects listed in the confirmation modal; the rest is shown as "and N more" (`0` lists all). |
 
 `update_fields` entries are dicts with:
 
@@ -65,6 +66,8 @@ One model can have several configs with different keys (for example `Customer` a
 | `get_update_form_class(field_name)` | update action | `update_form_class` |
 | `update_object(request, obj, values)` | update action, per object | `setattr` for every value, then `obj.save()` |
 | `get_related_list_url(request, model, ids)` | delete blocked by protected objects | `None` (objects listed as text) |
+| `get_object_label(obj)` | confirmation modal, per listed object | `str(obj)` |
+| `get_object_url(obj)` | confirmation modal, per listed object | `obj.get_absolute_url()` when the model has it, else no link |
 | `get_success_url(request)` | when `back_url` is missing or external | `MASSACTIONS_DEFAULT_SUCCESS_URL` |
 
 An explicit `permission_required` on a view wins over `get_permission_required()`.

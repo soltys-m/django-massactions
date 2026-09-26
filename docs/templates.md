@@ -89,6 +89,18 @@ Inside the blocks `ctx` is `mass_action_context`.
 Point a form at your override with `modal_content_template = 'helpers/mass_action_modal_content.html'`
 on the form class; `get_modal_content_context()` supplies extra variables.
 
+### The object list
+
+`massactions/mass_action_modal_object_list.html` renders `object_list` inside `<div class="mass-action-items">`
+as Bootstrap grid columns (`columns` include variable, default 3; `col-sm-6 col-md`, so they stack on phones), one
+object per line, linked when the config's `get_object_url()` returns a URL, labelled by `get_object_label()`, and
+cut after `modal_object_limit` objects with an "and N more objects" line. It reads `config` from the context;
+without one (for example on a project page that includes it with `object_list=...`) the defaults apply:
+`str(obj)`, `get_absolute_url()`, 100 objects. The modal content template uses two columns when the "not allowed"
+list is shown next to it and the modal container has `modal-dialog-scrollable`, so long lists scroll inside the
+modal. The template tag behind it, `{% massaction_object_listing object_list config=config limit=limit
+columns=3 as listing %}` (`{% load massactions %}`), returns `objects`, `columns` and `more` for your own markup.
+
 ## Menu link flavours
 
 The page script binds three kinds of links:

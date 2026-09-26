@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: django-massactions 0.1.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-25 09:55-0500\n"
+"POT-Creation-Date: 2026-09-26 12:43+0200\n"
 "PO-Revision-Date: 2026-09-25 12:00+0200\n"
 "Last-Translator: MS Code\n"
 "Language-Team: MS Code\n"
@@ -13,7 +13,8 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=4; plural=(n % 1 == 0 && n == 1 ? 0 : n % 1 == 0 && n >= 2 && n <= 4 ? 1 : n % 1 != 0 ? 2: 3);\n"
+"Plural-Forms: nplurals=4; plural=(n % 1 == 0 && n == 1 ? 0 : n % 1 == 0 && n "
+">= 2 && n <= 4 ? 1 : n % 1 != 0 ? 2: 3);\n"
 
 #, python-format
 msgid "Process objects of type: %s"
@@ -87,6 +88,14 @@ msgstr "Chýbajúce oprávnenia na zmenu"
 msgid "Missing permissions to process"
 msgstr "Chýbajúce oprávnenia na spracovanie"
 
+#, python-format
+msgid "and %(counter)s more object"
+msgid_plural "and %(counter)s more objects"
+msgstr[0] "a ďalší %(counter)s objekt"
+msgstr[1] "a ďalšie %(counter)s objekty"
+msgstr[2] "a ďalších %(counter)s objektov"
+msgstr[3] "a ďalších %(counter)s objektov"
+
 msgid "Select"
 msgstr "Označiť"
 
@@ -126,8 +135,7 @@ msgid "No object selected"
 msgstr "Nie je označený žiadny objekt"
 
 msgid ""
-"Objects could not be deleted, because they are associated with other "
-"objects."
+"Objects could not be deleted, because they are associated with other objects."
 msgstr "Objekty nebolo možné zmazať, pretože sú prepojené s inými objektmi."
 
 #, python-format

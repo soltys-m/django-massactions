@@ -67,6 +67,7 @@ class MarkupTests(TestCase):
         response = self.client.get('/items/')
         self.assertContains(response, "appendTo('body')")
         self.assertContains(response, 'id="modal"', count=1)
+        self.assertContains(response, 'modal-dialog modal-lg modal-dialog-scrollable')
 
     def test_helper_triggers_modal_shown_event(self):
         response = self.client.get('/items/')

@@ -1,6 +1,16 @@
 # Changelog
 
-## 0.2.0 (unreleased)
+## 0.2.1 (unreleased)
+
+* The confirmation modal lists the selected objects one per line in Bootstrap grid columns (three, or two next
+  to the "not allowed" list; `columns` include variable), the list takes the full modal width when every object
+  is allowed, the modal body scrolls (`modal-dialog-scrollable`) and the list stops after
+  `MassActionConfig.modal_object_limit` objects (default 100, `0` lists all) with an "and N more" line.
+* `MassActionConfig.get_object_label(obj)` and `get_object_url(obj)` decide what the modal shows for an object
+  (defaults: `str(obj)` and `get_absolute_url()`); the template tag `massaction_object_listing` applies them,
+  also when `massactions/mass_action_modal_object_list.html` is included on a project page without a config.
+
+## 0.2.0
 
 * The selection cookie is signed with `django.core.signing` (`SECRET_KEY`, salt, zlib compression, expiry
   `MASSACTIONS_SELECTION_MAX_AGE`, default one hour) instead of AES-ECB with the key appended to the value.

@@ -43,6 +43,8 @@ class DeleteTests(MassActionTestCase):
         self.assertContains(response, 'Delete objects of type: item')
         self.assertContains(response, 'Are you sure you want to delete 2 objects?')
         self.assertContains(response, 'Following objects will be deleted')
+        self.assertContains(response, '<div class="col-12">')
+        self.assertContains(response, '<li>', count=2)
         self.assertContains(response, 'href="/items/%s/"' % self.a.pk)
         self.assertContains(response, 'id="id_submit_btn"')
 
@@ -72,6 +74,7 @@ class DeleteTests(MassActionTestCase):
         self.select(select_all=True, key='ActiveItem')
         response = self.client.get(self.url('mass_delete', key='ActiveItem'))
         self.assertContains(response, 'Missing permissions to delete')
+        self.assertContains(response, '<div class="col-md-6">', count=2)
         self.assertContains(response, '>locked<')
         self.client.post(self.url('mass_delete', key='ActiveItem'))
         # inactive item is outside the config queryset, 'locked' is restricted by the config

@@ -151,6 +151,8 @@ in the template context (`django.template.context_processors.request`).
 | `get_update_form_class(field_name)` | Per-field form class. |
 | `update_object(request, obj, values)` | How the update action applies values to one object (default `setattr` + `save()`). |
 | `get_related_list_url(request, model, ids)` | Link for protected related objects that block a delete (default: plain text). |
+| `modal_object_limit` | Objects listed in the confirmation modal, the rest is shown as "and N more" (default `100`, `0` lists all). |
+| `get_object_label(obj)` / `get_object_url(obj)` | Text and link of one object in the confirmation modal (defaults `str(obj)`, `get_absolute_url()`). |
 | `get_success_url(request)` | Fallback redirect when `back_url` is missing or external. |
 
 ## Custom actions

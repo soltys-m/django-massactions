@@ -107,6 +107,7 @@ class BSModalMassActionFormMixin(BSModalForm):
     def get_modal_content_context(self):
         return {
             'action': self.action,
+            'config': self.config,
             'object_list': self.object_list,
             'not_allowed_object_list': self.not_allowed_object_list,
         }
