@@ -16,8 +16,9 @@ actions: **delete** and **update a field**. Custom actions plug into the same se
 4. The action view resolves everything from a **registered config** (`?key=...`): the queryset the
    user may see, the list filter (so "select all" respects the filtered list), the permission and
    the per-action restriction. The client never sends model names, queryset methods or form classes.
-5. After the action, the view redirects to `back_url` and sets the cookie to `True`, which makes the
-   list page reset the stored selection.
+5. The modal submits its form with one AJAX POST. Validation errors come back as the form and are shown in
+   the modal again; a finished action answers `{"redirect": back_url}` and sets the cookie to `True`, which
+   makes the list page reset the stored selection.
 
 ## Requirements
 
@@ -27,10 +28,9 @@ actions: **delete** and **update a field**. Custom actions plug into the same se
   the `bootstrap4` pack itself). CI runs the suite on Python 3.10 to 3.12 with Django 4.2, 5.0 and 5.1
   (crispy 2.x stack) and on Django 4.2 with the crispy 1.13 stack.
 * Optional: django-filter (for `filter_class`)
-* Frontend: jQuery, Bootstrap 4 or 5, Font Awesome (icons), [js-cookie](https://github.com/js-cookie/js-cookie)
-  and the **bundled fork** of the modal forms plugin:
-  `{% static 'massactions/js/jquery.bootstrap.modal.forms.js' %}` (adds `showModal()` and
-  `initOnClick`, which the stock plugin does not have). Use it instead of the plugin's own JS file.
+* Frontend: jQuery, Bootstrap 4 or 5, Font Awesome (icons) and [js-cookie](https://github.com/js-cookie/js-cookie).
+  The modal needs no modal forms plugin; the bundled `massactions/js/jquery.bootstrap.modal.forms.js` is kept
+  only for projects that still load it.
 * `django.contrib.messages` (success/error messages) and `django.contrib.sessions`.
 
 ## Installation
@@ -219,9 +219,9 @@ Two flavours of menu links are supported by the page script:
 Views that are not modals can use `MassActionViewMixin` directly; set `action` or `permission_required`.
 `window.massActions[key].resetSelection()` is available to project scripts.
 
-When a modal has been loaded and shown, the page triggers `massactions:modal-shown` on `document` with the
-modal element, the config key and the form URL, so project scripts can initialise widgets in the form
-(date pickers, select2, ...):
+When a modal has been loaded and shown, and again whenever its form is re-rendered with validation errors, the
+page triggers `massactions:modal-shown` on `document` with the modal element, the config key and the form URL,
+so project scripts can initialise widgets in the form (date pickers, select2, ...):
 
 ```js
 $(document).on('massactions:modal-shown', function (event, modal, key, formUrl) {

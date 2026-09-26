@@ -1,3 +1,4 @@
+from unittest import mock
 from urllib.parse import urlencode
 
 from django.contrib.auth.models import User, Permission
@@ -5,6 +6,7 @@ from django.test import TestCase
 from django.urls import reverse
 
 from massactions.helpers import unsign_selection
+from massactions.tests.massactions import ActiveItemMassActions
 from massactions.tests.models import Item, Child
 from massactions.tests.utils import set_selection, make_selection_cookie
 
@@ -209,6 +211,62 @@ class UpdateTests(MassActionTestCase):
         self.select([self.a.pk])
         response = self.client.get(self.url('mass_update', field_name='status', field_name_value='DONE'))
         self.assertContains(response, 'Permission missing')
+
+
+class AjaxSubmitTests(MassActionTestCase):
+    """The modal submits its form with one AJAX POST; the view answers with the form or with a JSON redirect."""
+    ajax = {'HTTP_X_REQUESTED_WITH': 'XMLHttpRequest'}
+
+    def test_valid_update_answers_with_json_redirect_and_resets_the_selection(self):
+        self.select([self.a.pk])
+        response = self.client.post(self.url('mass_update', field_name='status', field_name_value='DONE', back_url='/items/?page=2'), **self.ajax)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json(), {'redirect': '/items/?page=2'})
+        self.assertEqual(response.cookies['%s_Item' % self.user.id].value, 'True')
+        self.assertEqual(Item.objects.get(pk=self.a.pk).status, 'DONE')
+
+    def test_invalid_form_answers_with_the_form_and_changes_nothing(self):
+        self.select([self.a.pk], key='ActiveItem')
+        url = self.url('mass_update', key='ActiveItem', field_name='status', field_name_value='DONE')
+        response = self.client.post(url, {'note': ''}, **self.ajax)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response['Content-Type'].split(';')[0], 'text/html')
+        self.assertContains(response, 'This field is required')
+        self.assertContains(response, 'id="id_submit_btn"')
+        self.assertNotIn('%s_ActiveItem' % self.user.id, response.cookies)
+        self.assertEqual(Item.objects.get(pk=self.a.pk).status, 'NEW')
+
+    def test_action_runs_once_per_submit(self):
+        self.select([self.a.pk], key='ActiveItem')
+        url = self.url('mass_update', key='ActiveItem', field_name='status', field_name_value='DONE')
+        with mock.patch.object(ActiveItemMassActions, 'update_object', autospec=True) as update_object:
+            self.client.post(url, {'note': 'hello'}, **self.ajax)
+        self.assertEqual(update_object.call_count, 1)
+
+    def test_delete_answers_with_json_redirect(self):
+        self.select([self.a.pk])
+        response = self.client.post(self.url('mass_delete', back_url='/items/'), **self.ajax)
+        self.assertEqual(response.json(), {'redirect': '/items/'})
+        self.assertFalse(Item.objects.filter(pk=self.a.pk).exists())
+
+    def test_protected_delete_answers_with_json_redirect_and_failed_cookie(self):
+        Child.objects.create(item=self.a, label='child')
+        self.select([self.a.pk])
+        response = self.client.post(self.url('mass_delete', back_url='/items/'), **self.ajax)
+        self.assertEqual(response.json(), {'redirect': '/items/'})
+        self.assertEqual(response.cookies['%s_Item' % self.user.id].value, 'False')
+
+    def test_external_back_url_is_not_used_for_the_json_redirect(self):
+        self.select([self.a.pk])
+        response = self.client.post(self.url('mass_delete', back_url='https://evil.example/'), **self.ajax)
+        self.assertEqual(response.json(), {'redirect': '/'})
+
+    def test_no_permission_answers_with_the_message_modal(self):
+        self.user.user_permissions.clear()
+        self.select([self.a.pk])
+        response = self.client.post(self.url('mass_delete'), **self.ajax)
+        self.assertContains(response, 'Permission missing')
+        self.assertTrue(Item.objects.filter(pk=self.a.pk).exists())
 
 
 class EncryptViewTests(MassActionTestCase):

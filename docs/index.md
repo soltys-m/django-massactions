@@ -17,7 +17,8 @@ POST massactions:encrypt ──► cookie "<user_id>_<key>" = signed selection (
    │
    ▼
 GET  <action url>?key=<key>&back_url=<list url>   ──► modal with the objects and a confirmation
-POST <action url>?key=...                          ──► action runs, redirect to back_url,
+POST <action url>?key=...  (AJAX, once)            ──► errors: the form again, shown in the modal
+                                                    ──► done: {"redirect": back_url}, the page goes there,
                                                         cookie "<user_id>_<key>" = "True" resets the selection
 ```
 

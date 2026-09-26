@@ -115,8 +115,9 @@ The page script binds three kinds of links:
 
 ## Modal shown event
 
-After a confirmation modal has been loaded and shown, `massactions:modal-shown` is triggered on `document`
-with `(event, modal, key, formUrl)`. Use it to initialise widgets rendered inside the form:
+After a confirmation modal has been loaded and shown, and again whenever its form comes back with validation
+errors, `massactions:modal-shown` is triggered on `document` with `(event, modal, key, formUrl)`. Use it to
+initialise widgets rendered inside the form:
 
 ```js
 $(document).on('massactions:modal-shown', function (event, modal, key, formUrl) {
@@ -126,6 +127,15 @@ $(document).on('massactions:modal-shown', function (event, modal, key, formUrl) 
 
 Widgets that ship their own inline `<script>` (django-tempus-dominus for example) initialise themselves
 when the form HTML is inserted and do not need the event.
+
+## Modal submit
+
+The helper submits the modal form with one AJAX POST to the form URL (`X-Requested-With: XMLHttpRequest`):
+
+* HTML answer (the form with errors, or a message such as "Permission missing") replaces the modal content;
+* `{"redirect": url}` (what `finish()` returns for AJAX requests) navigates the page there, so messages set
+  by the action are shown on the list page;
+* a plain redirect that the browser followed navigates to the final URL.
 
 ## Element ids
 

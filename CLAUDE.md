@@ -39,7 +39,9 @@ CI: `.github/workflows/tests.yml` (Python 3.10-3.12 x Django 4.2/5.0/5.1 with th
   (appends the modal container to `<body>`), modal content. One set of templates serves Bootstrap 4 and 5:
   the markup carries both attribute sets, only the modal close button branches on `CRISPY_TEMPLATE_PACK`.
   Projects extend them with `{% extends %}` and the documented blocks.
-* `static/massactions/js/` – fork of the django-bootstrap-modal-forms plugin (`showModal`, `initOnClick`).
+* `static/massactions/js/` – fork of the django-bootstrap-modal-forms plugin, kept for projects that load it; the
+  mass action modal (`helpers/crispy_modal_form_helper_mass_action.html`) loads and submits its form itself
+  (one AJAX POST, `finish()` answers `{"redirect": url}`).
 * `locale/` – message catalogs, `.mo` files are committed. Slovak is reviewed; cs, pl, hu, ro and de were generated
   and not reviewed by native speakers.
 

@@ -3,37 +3,72 @@
     const massActionKey = '{{ mass_action_context.key|escapejs }}';
     const selector = '.mass-action-{{ mass_action_context.key|slugify }}';
     const cookieName = '{{ request.user.id }}' + '_' + massActionKey;
-    const modalSettings = {
-        modalID: "#modal",
-        modalContent: ".crispy-modal-content",
-        modalForm: ".crispy-modal-content form"
-    };
+    const modalId = '#modal';
+    const contentSelector = '.crispy-modal-content';
 
     // the container is appended to <body>, so this template may be included anywhere (e.g. inside a dropdown menu)
     function ensureModalContainer() {
-        if ($(modalSettings.modalID).length === 0) {
+        if ($(modalId).length === 0) {
             $('<div class="modal fade crispy-modal" tabindex="-1" role="dialog" id="modal">' +
               '<div class="modal-dialog modal-lg modal-dialog-scrollable" role="document"><div class="modal-content crispy-modal-content"></div></div>' +
               '</div>').appendTo('body');
         }
     }
 
-    function initModalForms() {
-        $(selector).each(function () {
-            $(this).modalForm($.extend({}, modalSettings, {
-                formURL: $(this).data('form-url'),
-                initOnClick: false,
-                asyncUpdate: 'false',
-                errorClass: '.is-invalid, .invalid-feedback, .alert-danger',
-                asyncSettings: {
-                    closeOnSubmit: 'true',
-                    addModalFormFunction: initModalForms
-                }
-            }));
+    // lets the project initialise widgets in the form (date pickers, select2, ...), after the modal is shown
+    // and again after the form is re-rendered with validation errors:
+    // $(document).on('massactions:modal-shown', function (event, modal, key, formUrl) { ... });
+    function notifyShown(formUrl) {
+        $(document).trigger('massactions:modal-shown', [$(modalId)[0], massActionKey, formUrl]);
+    }
 
-            $(this).click(function (e) {
-                e.preventDefault();
+    function samePage(url, formUrl) {
+        const a = new URL(url, window.location.href);
+        const b = new URL(formUrl, window.location.href);
+        return a.pathname + a.search === b.pathname + b.search;
+    }
+
+    // one POST: validation errors come back as the form (shown in the modal again),
+    // a finished action as {"redirect": url} (finish() answers AJAX requests with JSON)
+    function bindForm(formUrl) {
+        $(modalId).find(contentSelector + ' form').on('submit', function (e) {
+            e.preventDefault();
+            const $form = $(this);
+            $form.find('[type="submit"]').prop('disabled', true);
+
+            $.ajax({
+                type: 'POST',
+                url: formUrl,
+                data: new FormData(this),
+                contentType: false,
+                processData: false,
+                success: function (data, status, xhr) {
+                    if (data && data.redirect) {
+                        window.location.href = data.redirect;
+                    } else if (xhr.responseURL && !samePage(xhr.responseURL, formUrl)) {
+                        // a view answered with a plain redirect, which the browser followed
+                        window.location.href = xhr.responseURL;
+                    } else {
+                        $(modalId).find(contentSelector).html(data);
+                        bindForm(formUrl);
+                        notifyShown(formUrl);
+                    }
+                },
+                error: function (xhr) {
+                    $form.find('[type="submit"]').prop('disabled', false);
+                    console.log('Mass action failed.', xhr);
+                }
             });
+        });
+    }
+
+    function showModal(formUrl) {
+        $(modalId).find(contentSelector).load(formUrl, function () {
+            bindForm(formUrl);
+            $(modalId).off('shown.bs.modal.massactions').one('shown.bs.modal.massactions', function () {
+                notifyShown(formUrl);
+            });
+            $(modalId).modal('show');
         });
     }
 
@@ -49,12 +84,7 @@
             },
             success: function (data) {
                 Cookies.set(cookieName, data.encrypted_string, {expires: new Date(new Date().getTime() + (1000 * 60 * 60))});
-                // let the project initialise widgets in the loaded form (date pickers, select2, ...):
-                // $(document).on('massactions:modal-shown', function (event, modal, key, formUrl) { ... });
-                $(modalSettings.modalID).off('shown.bs.modal.massactions').on('shown.bs.modal.massactions', function () {
-                    $(document).trigger('massactions:modal-shown', [this, massActionKey, formUrl]);
-                });
-                showModal($.extend({}, modalSettings, {formURL: formUrl}));
+                showModal(formUrl);
             },
             error: function (data) {
                 console.log('Encryption failed.', data);
@@ -64,8 +94,8 @@
 
     $(document).ready(function () {
         ensureModalContainer();
-        initModalForms();
-        $(selector).on('click', function () {
+        $(selector).on('click', function (e) {
+            e.preventDefault();
             openModal($(this).data('form-url'));
         });
     });

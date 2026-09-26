@@ -32,6 +32,21 @@ class MassArchiveView(BSModalMassActionViewMixin):
         return self.finish()               # redirect to back_url and reset the stored selection
 ```
 
+The modal posts the form with AJAX, once. A view with inputs validates them and answers
+`self.form_invalid(form)` when they are wrong (the modal shows the errors), otherwise it runs the action and
+answers `self.finish()`, which returns `{"redirect": back_url}` to AJAX requests and a redirect otherwise:
+
+```python
+    def post(self, request, *args, **kwargs):
+        form = self.get_form_class()(request.POST, **self.get_form_kwargs())
+
+        if not form.is_valid():
+            return self.form_invalid(form)
+
+        ...
+        return self.finish()
+```
+
 ```python
 urlpatterns = [
     path('archive/', MassArchiveView.as_view(), name='mass_archive'),
@@ -50,7 +65,8 @@ What the mixin gives you in the view:
 | `selection` | `{'ids': [...], 'selectAll': bool, ...}` from the cookie |
 | `restricted_object_list` | objects the user may act on |
 | `not_allowed_object_list` | selected objects excluded by `restrict_queryset()` |
-| `finish(success=True)` | redirect + reset cookie |
+| `finish(success=True)` | redirect (JSON `{"redirect": url}` for AJAX requests) + reset cookie |
+| `is_ajax()` | whether the request came from the modal's AJAX submit |
 | `render_modal_message(title, message)` | small modal with a message (modal views) |
 
 ## Full page action

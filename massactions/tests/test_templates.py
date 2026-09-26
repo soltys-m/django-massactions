@@ -73,6 +73,13 @@ class MarkupTests(TestCase):
         response = self.client.get('/items/')
         self.assertContains(response, "$(document).trigger('massactions:modal-shown'")
 
+    def test_helper_submits_the_modal_form_itself(self):
+        response = self.client.get('/items/')
+        self.assertContains(response, 'data: new FormData(this)')
+        self.assertContains(response, 'window.location.href = data.redirect;')
+        self.assertNotContains(response, '.modalForm(')
+        self.assertNotContains(response, 'showModal($.extend')
+
     def test_menu_items_only(self):
         """A project with its own actions dropdown renders just the items (block ``mass_action_menu_items``)."""
         response = self.client.get('/items/menu-only/')

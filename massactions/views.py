@@ -140,9 +140,16 @@ class MassActionViewMixin(PermissionRequiredMixin):
         messages.error(self.request, self.select_object_message)
         return redirect(self.get_success_url())
 
+    def is_ajax(self):
+        return self.request.headers.get('x-requested-with') == 'XMLHttpRequest'
+
     def finish(self, success=True):
-        """Redirect back and tell the list page to reset the stored selection."""
-        response = redirect(self.get_success_url())
+        """
+        Redirect back and tell the list page to reset the stored selection. The modal submits its form with
+        AJAX, so an AJAX request gets ``{"redirect": url}`` and the page script navigates there.
+        """
+        url = self.get_success_url()
+        response = JsonResponse({'redirect': url}) if self.is_ajax() else redirect(url)
         return set_selection_done_cookie(response, self.user_mass_action_cookie, success)
 
 

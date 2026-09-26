@@ -56,13 +56,8 @@ reverse these names, so the namespace must be `massactions` (the default from `a
 
 ## Frontend
 
-The templates expect on the page: jQuery, Bootstrap 4 or 5 (dropdown, collapse, modal), Font Awesome icons,
-[js-cookie](https://github.com/js-cookie/js-cookie) (`Cookies`) and the bundled fork of the
-django-bootstrap-modal-forms plugin:
-
-```django
-<script src="{% static 'massactions/js/jquery.bootstrap.modal.forms.js' %}"></script>
-```
-
-Use it **instead of** the plugin's own `jquery.bootstrap.modal.forms.js`; the fork adds `showModal()`
-and the `initOnClick` option that the action bar relies on.
+The templates expect on the page: jQuery, Bootstrap 4 or 5 (dropdown, collapse, modal), Font Awesome icons and
+[js-cookie](https://github.com/js-cookie/js-cookie) (`Cookies`). The modal loads and submits its form itself, so
+no modal forms plugin is needed. The bundled `massactions/js/jquery.bootstrap.modal.forms.js` (a fork of the
+django-bootstrap-modal-forms plugin) is kept for projects that still load it; it is backwards compatible with the
+stock plugin.

@@ -1,6 +1,16 @@
 # Changelog
 
-## 0.2.1 (unreleased)
+## 0.2.2 (unreleased)
+
+* The modal loads and submits its form itself with one AJAX POST. Validation errors are shown in the modal
+  (they used to replace the whole page with the bare form), a finished action answers `{"redirect": url}`.
+  `MassActionViewMixin.finish()` returns that JSON for AJAX requests (`is_ajax()`), a redirect otherwise.
+* `massactions:modal-shown` is triggered again after the form is re-rendered with errors, so widgets can be
+  initialised again.
+* The modal no longer needs the django-bootstrap-modal-forms JS plugin; the bundled fork stays for projects
+  that load it.
+
+## 0.2.1
 
 * The confirmation modal lists the selected objects one per line in Bootstrap grid columns (three, or two next
   to the "not allowed" list; `columns` include variable), the list takes the full modal width when every object
